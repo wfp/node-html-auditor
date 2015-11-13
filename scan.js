@@ -14,7 +14,6 @@
  */
 var util = require('util');
 var exec = require('child_process').exec;
-var sys = require('sys');
 var fs = require('fs');
 var colors = require('colors');
 var argv = require('yargs').argv;
@@ -94,5 +93,5 @@ var _pa11y = function(file, stats) {
  * @param {String} stderr
  */
 var puts = function(error, stdout, stderr) {
-  sys.puts(stdout);
+  console.log(stdout);
 }
