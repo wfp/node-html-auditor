@@ -6,6 +6,10 @@
     "type" : "git",
     "url" : "https://github.com/wfp/node-a11y-auditor.git"
   },
+  "preferGlobal": true,
+  "bin": {
+    "a11y-audit": "index.js"
+  },
   "engines": {
     "node": ">=0.10.0"
   },
