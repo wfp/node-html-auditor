@@ -17,6 +17,7 @@ var exec = require('child_process').exec;
 var fs = require('fs');
 var colors = require('colors');
 var argv = require('yargs').argv;
+var pa11y = require('pa11y');
 
 try {
   // Check for --path argument validness
@@ -31,9 +32,10 @@ try {
       files.forEach(function(file) {
         fs.lstat(file, function(error, stats) {
           if (error) {
-            throw new Error(util.format('file %s couln\'t be found.'.red, file));
+            throw new Error(util.format('file %s couldn\'t be found.'.red, file));
           }
           // Scan HTML files.
+           console.log("hey");
           _pa11y(path, stats);
         });
       });
@@ -41,7 +43,7 @@ try {
     else {
       fs.lstat(path, function(error, stats) {
         if (error) {
-          throw new Error(util.format('path %s couln\'t be found.'.red, path));
+          throw new Error(util.format('path %s couldn\'t be found.'.red, path));
         }
         // In case of directory do the scan for each file.
         if (stats.isDirectory()) {
@@ -64,6 +66,7 @@ try {
 catch (e) {
   console.error(e.message);
 }
+
 /**
  * @callback _pa11y - Executing CLI command - pa11y.
  *
@@ -72,19 +75,35 @@ catch (e) {
  */
 var _pa11y = function(file, stats) {
   var _file = file.split('/');
-  // Prapare regex for .html match.
+  // Prepare regex for .html match.
   var regex = /[a-zA-Z]+(([\-_])?[0-9]+)?\.html/;
   // Check for file validness & extension (.html is allowed).
   if (stats.isFile() && regex.test(_file[_file.length - 1])) {
-    // Prapare CLI commad.
-    var pa11y = util.format('pa11y --standard WCAG2A --ignore "notice;warning" file:%s.html', file.replace(/\.[^/.]+$/, ''))
-    // Execute CLI command.
-    exec(pa11y, puts);
+    var options = {
+      standard: 'WCAG2A',
+      ignore: [
+        'notice',
+        'warning'
+      ]
+    };
+    pa11y(options, function (error, test, exit) {
+        test(util.format('file:%s.html', file.replace(/\.[^/.]+$/, '')), function (error, results) {
+          if (error) {
+            console.log(error.stack);
+            console.log('Error code: '+error.code);
+            console.log('Signal received: '+error.signal);
+          }
+          else {
+            console.log(results);
+          }
+        });
+    });
   }
   else {
     throw new Error(util.format('%s isn\'t valid HTML file.'.red, file));
   }
 }
+
 /**
  * @callback puts - Outputs CLI result.
  *
@@ -93,5 +112,12 @@ var _pa11y = function(file, stats) {
  * @param {String} stderr
  */
 var puts = function(error, stdout, stderr) {
-  console.log(stdout);
+  if (error) {
+     console.log(error.stack);
+     console.log('Error code: '+error.code);
+     console.log('Signal received: '+error.signal);
+  }
+  else {
+    console.log(stdout);
+  }
 }
