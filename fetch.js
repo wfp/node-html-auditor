@@ -1,5 +1,12 @@
 #! /usr/bin/env node
 
+/**
+ * @file fetch.js
+ * @author Lasha Badashvili
+ *
+ * Fetches sitemap.xml URIs & downloading HTML content.
+ */
+
 'use strict';
 
 /**
@@ -8,23 +15,21 @@
 var http = require('http');
 var util = require('util');
 var join = require('path').join;
-var url = require('url');
 var fs = require('fs');
-var sys = require('sys')
-var exec = require('child_process').exec;
+var colors = require('colors');
 var smta = require('sitemap-to-array');
-
-// Get arguments.
-var _arguments = process.argv.slice(2);
+var argv = require('yargs').argv;
 
 try {
+  // Get URI.
+  var uri = argv.uri;
+  // Regex for URI.
+  var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
   // Check for sitemap URI validness.
-  var condition = _arguments[0] && url.parse(_arguments[0]).hostname && _arguments[0].indexOf('sitemap') > - 1;
-  var uri = condition
-    ? _arguments[0]
-      : (function() {
-          throw new Error(util.format('%s isn\'t valid URI', _arguments[0]));
-        })();
+  var condition = uri && regex.test(uri) && uri.indexOf('sitemap') > -1;
+  uri = condition ? uri : (function() {
+    throw new Error(util.format('%s isn\'t valid URI'.red, uri));
+  })();
   // Parse sitemap XML.
   smta(uri, function(error, sitemaps) {
     if (error) {
@@ -35,6 +40,8 @@ try {
       // Do http call for each of the URL & get HTML content.
       // Create unique filename and append file with the HTML content.
       sitemaps.forEach(function(sitemap, key) {
+        // Create unique filename.
+        var filename = util.format('sitemap-%d.html', key);
         // Get sitemap URL.
         var _url = sitemap.loc;
         // HTTP call.
@@ -44,10 +51,8 @@ try {
             // Get chunk buffer and convert it to the HTML string.
             var data = chunk.toString();
             if (data) {
-              // Create unique filename.
-              var filename = util.format('sitemap-%d.html', key);
               // Create file & write content.
-              fs.appendFile(join('files', 'a11y_audit', filename), chunk.toString(), function (error) {
+              fs.appendFile(join(__dirname, 'files', 'a11y_audit', filename), data, function (error) {
                 if (error) {
                   console.error(error);
                 }
@@ -57,24 +62,15 @@ try {
           // error event.
           .on('error', function(error) {
             console.error(error);
+          })
+          .on('end', function() {
+            console.log('%s has been added.', filename.yellow);
           });
         });
       });
     }
   });
-
 }
 catch(e) {
   console.error(e.message);
 }
-
-var puts = function(error, stdout, stderr) {
-  if (error) {
-    console.error(error);
-  }
-  sys.puts(stdout);
-}
-
-var pa11y = 'for file in files/a11y_audit/*.html; do pa11y --standard WCAG2A --ignore \'notice;warning\' file:$file; done';
-
-exec(pa11y, puts);
