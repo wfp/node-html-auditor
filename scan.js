@@ -44,8 +44,11 @@ try {
         if (error) {
           throw new Error(util.format('path %s couln\'t be found.'.red, path));
         }
+        // In case of directory do the scan for each file.
         if (stats.isDirectory()) {
+          // Prepare CLI command.
           var pa11y = "for file in files/a11y_audit/*.html; do pa11y --standard WCAG2A --ignore 'notice;warning' file:$file; done;"
+          // Execute CLI command.
           exec(pa11y, puts);
         }
         else {
