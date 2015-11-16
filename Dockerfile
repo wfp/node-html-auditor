@@ -4,7 +4,7 @@ FROM phusion/baseimage:latest
 CMD ["/sbin/my_init"]
 
 RUN apt-get -yqq update
-RUN apt-get-yqq upgrade
+RUN apt-get -yqq upgrade
 RUN apt-get install -yqq curl
 
 RUN curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -
