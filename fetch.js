@@ -22,22 +22,22 @@ var argv = require('yargs').argv;
 var format = util.format;
 
 try {
-  // Get URI.
+  // Get uri.
   var uri = argv.uri;
   // Get directory.
   var dir = argv.dir;
-  // arguments condition.
+  // Arguments condition.
   var condition = !uri || !dir;
   if (condition) {
+    // Throws error (--uri or --dir argument is missing).
     throw new Error('arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
   }
-  // Get directory stats.
   fs.lstat(dir, function(error, stats) {
     if (error) {
       throw new Error(format('%s'.red, error));
     }
-    if (stats && stats.isDirectory()) {
-      // Regex for URI.
+    if (stats.isDirectory()) {
+      // Regex for uri.
       var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
       // Check for sitemap URI validness.
       var condition = uri && regex.test(uri) && uri.indexOf('sitemap') > -1;
@@ -63,7 +63,8 @@ try {
           http.get(_url, function(response) {
             // Response - error event.
             response.on('error', function(error) {
-              throw new Error(format('%s'.red, error));
+              // Log error.
+              console.error(error);
             })
             // Response - data event - Get HTML content.
             .on('data', function(chunk) {
@@ -92,5 +93,6 @@ try {
   });
 }
 catch(e) {
+  // Log exception message.
   console.error(e.message);
 }
