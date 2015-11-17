@@ -1,1 +1,1 @@
-### All downloaded files will be saved in this (files/a11y_audit) directory.
+### Download and save .html files taken from sitemap.xml.

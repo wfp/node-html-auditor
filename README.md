@@ -12,12 +12,12 @@ npm link
 ### Fetch HTML
 
 ```
-html-fetch --uri [URI]
+html-fetch --uri [URI] --dir [path/to/directory]
 ```
 
 ### Accessibility audit (a11y, WCAG)
 
 ```
-a11y-audit --path [path/to/folder]
-a11y-audit --path [path/to/folder/file.html]
-a11y-audit --path [path/to/folder/file.html path/to/folder/file-1.html ... ]
+a11y-audit --path [path/to/folder] --report [path/to/report]
+a11y-audit --path [path/to/folder/file.html] --report [path/to/report]
+a11y-audit --path [path/to/folder/file.html path/to/folder/file-1.html ... ] --report [path/to/report]

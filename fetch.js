@@ -26,9 +26,10 @@ try {
   var uri = argv.uri;
   // Get directory.
   var dir = argv.dir;
-  // Check for directory validness.
-  if (typeof dir !== 'string') {
-    throw new Error(format('%s isn\'t valid directory, please provide correct --dir argument.'.red, dir));
+  // arguments condition.
+  var condition = !uri || !dir;
+  if (condition) {
+    throw new Error('arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
   }
   // Get directory stats.
   fs.lstat(dir, function(error, stats) {
@@ -54,31 +55,34 @@ try {
         sitemaps.forEach(function(sitemap, key) {
           // Create unique filename.
           var filename = format('sitemap-%d.html', key);
+          // Get directory.
+          var _dir = dir.replace(/\/$/, '');
           // Get sitemap URL.
           var _url = sitemap.loc;
           // HTTP call.
           http.get(_url, function(response) {
-            // data event - Get HTML content.
-            response.on('data', function(chunk) {
-              // Get chunk buffer and convert it to the HTML string.
-              var data = chunk.toString();
-              if (data) {
+            // Response - error event.
+            response.on('error', function(error) {
+              throw new Error(format('%s'.red, error));
+            })
+            // Response - data event - Get HTML content.
+            .on('data', function(chunk) {
+              if (chunk.length) {
+                // Get chunk buffer and convert it to the HTML string.
+                var data = chunk.toString();
                 // Create file & write content.
-                fs.appendFile(join(__dirname, dir, filename), data, function (error) {
+                fs.appendFile(join(__dirname, _dir, filename), data, function (error) {
                   if (error) {
                     throw new Error(format('%s'.red, error));
                   }
                 });
               }
             })
-            // error event.
-            .on('error', function(error) {
-              throw new Error(format('%s'.red, error));
-            })
+            // Response - end event.
             .on('end', function() {
-              console.log('%s has been added.', filename.yellow);
+              console.log('%s/%s has been added.'.green, _dir, filename);
             });
-          });
+          }).end();
         });
       });
     }

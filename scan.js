@@ -12,67 +12,70 @@
 /**
  * Module dependencies.
  */
-var util = require('util');
-var exec = require('child_process').exec;
+var format = require('util').format;
 var path = require('path');
 var fs = require('fs');
 var colors = require('colors');
-var argv = require('yargs').argv;
 var pa11y = require('pa11y');
-var format = util.format;
+var argv = require('yargs').argv;
+var extname = path.extname;
 var join = path.join;
 
 try {
-  // Check for --path argument validness
-  if (argv.hasOwnProperty('path') && typeof argv.path !== 'boolean' && typeof argv.path === 'string') {
-    // Get files array.
-    var files = argv._;
-    // Get path to file (This might be directory or single file).
-    var path = argv.path;
-    if (files.length) {
-      // Merge path & files.
-      files.push(path);
-      files.forEach(function(file) {
-        fs.lstat(file, function(error, stats) {
-          if (error) {
-            throw new Error(format('%s couldn\'t be found.'.red, file));
-          }
-          // Scan HTML files.
-          _pa11y(path, stats);
-        });
-      });
-    }
-    else {
-      fs.lstat(path, function(error, stats) {
+  // Get path to file (This might be directory or single file).
+  var _path = argv.path;
+  // Get report directory.
+  var report = argv.report;
+  // arguments condition.
+  var condition = !report || !_path;
+  if (condition) {
+    throw new Error('arguments are missing a11y-audit --path [path/to/file(s)] --report [path/to/report]'.red);
+  }
+  // Get files array.
+  var files = argv._;
+  if (files.length) {
+    // Merge path & files.
+    files.push(_path);
+    files.forEach(function(file) {
+      fs.lstat(file, function(error, stats) {
         if (error) {
-          console.error(format('%s couldn\'t be found.'.red, path));
+          throw new Error(format('%s'.red, error));
         }
-        // In case of directory do the scan for each file.
-        if (stats && stats.isDirectory()) {
-          // Read directory and get all files.
-          fs.readdir(path, function(error, files) {
-            if (error) {
-              throw new Error(format('Error happened while reading %s directory'.red, path));
-            }
-            files.forEach(function(file) {
-              file = join(path, file);
-              // Get file stats.
-              fs.lstat(file, function(error, stats) {
-                // Test file(s).
-                _pa11y(file, stats);
-              })
-            });
-          });
-        }
-        else {
-          // Test file.
-          _pa11y(path, stats);
-        }
+        // Test file(s).
+        _pa11y(file, report, stats);
       });
-    }
+    });
   }
   else {
-    throw new Error('Path isn\'t valid.'.red);
+    fs.lstat(_path, function(error, stats) {
+      if (error) {
+        throw new Error(format('%s'.red, error));
+      }
+      // In case of directory do the scan for each file.
+      if (stats && stats.isDirectory()) {
+        // Read directory and get all files.
+        fs.readdir(_path, function(error, files) {
+          if (error) {
+            throw new Error(format('%s'.red, error));
+          }
+          files.forEach(function(file) {
+            file = join(_path, file);
+            // Get file stats.
+            fs.lstat(file, function(error, stats) {
+              if (error) {
+                throw new Error(format('%s'.red, error));
+              }
+              // Test file(s).
+              _pa11y(file, report, stats);
+            })
+          });
+        });
+      }
+      else {
+        // Test file.
+        _pa11y(_path, report, stats);
+      }
+    });
   }
 }
 catch (e) {
@@ -80,17 +83,19 @@ catch (e) {
 }
 
 /**
- * @callback _pa11y - Executing CLI command - pa11y.
+ * @callback _pa11y - Executing pa11y.
  *
  * @param {String} file
+ * @param {String} report
  * @param {Object} stats
  */
-var _pa11y = function(file, stats) {
-  var _file = file.split('/');
+var _pa11y = function(file, report, stats) {
   // Prepare regex for .html match.
   var regex = /[a-zA-Z]+(([\-_])?[0-9]+)?\.html/;
+  var _file = file.match(regex);
   // Check for file validness & extension (.html is allowed).
-  if (stats && stats.isFile() && regex.test(_file[_file.length - 1])) {
+  if (stats && stats.isFile() && _file) {
+    _file = _file[0];
     // Prepare pa11y options.
     var options = {
       standard: 'WCAG2A',
@@ -102,13 +107,38 @@ var _pa11y = function(file, stats) {
     // Test file.
     pa11y(options).run(format('file:%s', file), function(error, data) {
       if (error) {
-        throw new Error(format('Error happened while testing %s file'.red, file));
+        throw new Error(format('%s'.red, error));
       }
-      // Output.
-      console.dir(data);
+      if (data.length) {
+        fs.lstat(report, function(error, stats) {
+          if (error) {
+            throw new Error(format('%s'.red, error));
+          }
+          if (stats.isDirectory()) {
+            // Get report directory.
+            var _report = report.replace(/\/$/, '');
+            // Replace .html file with .json.
+            _file = _file.substr(0, _file.lastIndexOf('.')) + '.json';
+            // Create write stream.
+            var stream = fs.createWriteStream(join(__dirname, _report, _file));
+            // Write stream.
+            stream.write(JSON.stringify(data));
+            // error event.
+            stream.on('error', function(error) {
+              throw new Error(format('%s'.red, error));
+            });
+            stream.on('finish', function() {
+              console.log('report %s/%s has been added.'.green, _report, _file);
+            }).end();
+          }
+          else {
+            throw new Error(format('%s isn\'t directory.'.red))
+          }
+        });
+      }
     });
   }
   else {
-    console.error(format('%s isn\'t valid HTML file.'.red, file));
+    console.error(format('%s isn\'t html file.'.red, file));
   }
 }
