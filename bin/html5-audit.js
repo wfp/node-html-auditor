@@ -60,8 +60,7 @@ var _html5Lint = function(file, callback) {
     // html5Lint - Test file.
     html5Lint(file, function(error, data) {
       if (error) {
-        // throw new Error(format('%s'.red, error));
-        console.log(error);
+        throw new Error(format('%s'.red, error));
       }
       if (data.messages.length) {
         // Push result in _data variable.
