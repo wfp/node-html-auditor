@@ -30,6 +30,7 @@ try {
   if (condition) {
     throw new Error('arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
   }
+  // Get dir stats.
   fs.lstat(dir, function(error, stats) {
     if (error) {
       throw new Error(format('%s'.red, error));
@@ -62,7 +63,7 @@ try {
             // Response - error event.
             response.on('error', function(error) {
               // Log error.
-              console.error(error);
+              console.error(error.red);
             })
             // Response - data event - Get HTML content.
             .on('data', function(chunk) {
@@ -70,17 +71,13 @@ try {
                 // Get chunk buffer and convert it to the HTML string.
                 var data = chunk.toString();
                 // Create file & write content.
-                fs.appendFile(join(__dirname, _dir, filename), data, function(error) {
+                fs.appendFile(join('.', _dir, filename), data, function(error) {
                   if (error) {
                     throw new Error(format('%s'.red, error));
                   }
                 });
               }
             })
-            // Response - end event.
-            .on('end', function() {
-              console.log('%s/%s has been added.'.green, _dir, filename);
-            });
           }).end();
         });
       });
