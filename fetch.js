@@ -63,26 +63,26 @@ try {
           http.get(_url, function(response) {
             // Response - error event.
             response.on('error', function(error) {
-              // Log error.
-              console.error(error);
-            })
-            // Response - data event - Get HTML content.
-            .on('data', function(chunk) {
-              if (chunk.length) {
-                // Get chunk buffer and convert it to the HTML string.
-                var data = chunk.toString();
-                // Create file & write content.
-                fs.appendFile(join(__dirname, _dir, filename), data, function (error) {
-                  if (error) {
-                    throw new Error(format('%s'.red, error));
-                  }
-                });
-              }
-            })
-            // Response - end event.
-            .on('end', function() {
-              console.log('%s/%s has been added.'.green, _dir, filename);
-            });
+                // Log error.
+                console.error(error);
+              })
+              // Response - data event - Get HTML content.
+              .on('data', function(chunk) {
+                if (chunk.length) {
+                  // Get chunk buffer and convert it to the HTML string.
+                  var data = chunk.toString();
+                  // Create file & write content.
+                  fs.appendFile(join(__dirname, _dir, filename), data, function(error) {
+                    if (error) {
+                      throw new Error(format('%s'.red, error));
+                    }
+                  });
+                }
+              })
+              // Response - end event.
+              .on('end', function() {
+                console.log('%s/%s has been added.'.green, _dir, filename);
+              });
           }).end();
         });
       });
@@ -92,7 +92,7 @@ try {
     }
   });
 }
-catch(e) {
+catch (e) {
   // Log exception message.
   console.error(e.message);
 }

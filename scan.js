@@ -46,41 +46,41 @@ try {
     }
     if (stats.isDirectory()) {
       (function(callback) {
-      // Get files object.
-      var files = argv._;
-      files.push(_path);
-      files.forEach(function(file) {
-        fs.lstat(file, function(error, stats) {
-          if (error) {
-            throw new Error(format('%s'.red, error));
-          }
-          // Remove last slash for --path (e.g - path/to/file/ = pato/to/file).
-          file = file.replace(/\/$/, '');
-          // Case path is directory.
-          // Get all files from directory.
-          // Passing files array to the callback e.g - [path/to/file.html, path/to/file-1.html].
-          if (stats.isDirectory()) {
-            // Read directory & get all files from directory.
-            fs.readdir(file, function(error, _files) {
-              if (error) {
-                throw new Error(format('%s'.red, error));
-              }
-              // Update files value setting full path.
-              _files.forEach(function(_file, key, _files) {
-                _files[key] = join(file, _file);
+        // Get files object.
+        var files = argv._;
+        files.push(_path);
+        files.forEach(function(file) {
+          fs.lstat(file, function(error, stats) {
+            if (error) {
+              throw new Error(format('%s'.red, error));
+            }
+            // Remove last slash for --path (e.g - path/to/file/ = pato/to/file).
+            file = file.replace(/\/$/, '');
+            // Case path is directory.
+            // Get all files from directory.
+            // Passing files array to the callback e.g - [path/to/file.html, path/to/file-1.html].
+            if (stats.isDirectory()) {
+              // Read directory & get all files from directory.
+              fs.readdir(file, function(error, _files) {
+                if (error) {
+                  throw new Error(format('%s'.red, error));
+                }
+                // Update files value setting full path.
+                _files.forEach(function(_file, key, _files) {
+                  _files[key] = join(file, _file);
+                });
+                // Calling callback - passing files.
+                callback(_files);
               });
-              // Calling callback - passing files.
-              callback(_files);
-            });
-          }
-          // Case path is file or files list.
-          // Passing file or files list as array to the callback.
-          else {
-            // Calling callback - passing files. e.g - [path/to/file.html] [path/to/file-1.html]
-            callback([file]);
-          }
+            }
+            // Case path is file or files list.
+            // Passing file or files list as array to the callback.
+            else {
+              // Calling callback - passing files. e.g - [path/to/file.html] [path/to/file-1.html]
+              callback([file]);
+            }
+          });
         });
-      });
       })(function(files) {
         files.forEach(function(file) {
           // Check file (only .html files will pass check, others will be skipped.).
@@ -118,36 +118,4 @@ try {
 catch (e) {
   // Log exception message.
   console.error(e.message);
-}
-
-/**
- * @callback _pa11y - Executing pa11y.
- *
- * @param {String} file
- * @param {String} report
- * @param {Object} stats
- */
-var _pa11y = function(file, callback) {
-  // Prepare pa11y options.
-  var options = {
-    standard: 'WCAG2A',
-    ignore: [
-      'notice',
-      'warning'
-    ]
-  };
-  // Test file.
-  pa11y(options).run(format('file:%s', file), function(error, data) {
-    if (error) {
-      throw new Error(format('%s'.red, error));
-    }
-    if (data.length) {
-      // Push all report object in _data object.
-      data.forEach(function(object) {
-        _data.push(object);
-      });
-      // Calling callback - passing data object.
-      callback(_data);
-    }
-  });
 }

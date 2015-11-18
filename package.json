@@ -2,13 +2,15 @@
   "name": "node-a11y-auditor",
   "version": "1.0.0",
   "description": "Accessibility auditor for NodeJS",
+  "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
     "url": "https://github.com/wfp/node-a11y-auditor.git"
   },
   "preferGlobal": true,
   "bin": {
-    "a11y-audit": "scan.js",
+    "a11y-audit": "modules/pa11y.js",
+    "html5-audit": "modules/html5-audit.js",
     "html-fetch": "fetch.js"
   },
   "engines": {
@@ -16,6 +18,7 @@
   },
   "dependencies": {
     "colors": "^1.1.2",
+    "html5-lint": "^0.2.5",
     "pa11y": "^3.0.1",
     "sitemap-to-array": "^2.0.0",
     "yargs": "^3.29.0"
