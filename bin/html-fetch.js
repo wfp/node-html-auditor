@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 /**
- * @file fetch.js
+ * @file html-fetch.js
  * @author Lasha Badashvili
  *
  * Fetches sitemap.xml URIs & downloading HTML content.
@@ -12,14 +12,13 @@
 /**
  * Module dependencies.
  */
+var format = require('util').format;
 var http = require('http');
-var util = require('util');
 var join = require('path').join;
 var fs = require('fs');
 var colors = require('colors');
 var smta = require('sitemap-to-array');
 var argv = require('yargs').argv;
-var format = util.format;
 
 try {
   // Get uri.
@@ -29,7 +28,6 @@ try {
   // Arguments condition.
   var condition = !uri || !dir;
   if (condition) {
-    // Throws error (--uri or --dir argument is missing).
     throw new Error('arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
   }
   fs.lstat(dir, function(error, stats) {
@@ -63,26 +61,26 @@ try {
           http.get(_url, function(response) {
             // Response - error event.
             response.on('error', function(error) {
-                // Log error.
-                console.error(error);
-              })
-              // Response - data event - Get HTML content.
-              .on('data', function(chunk) {
-                if (chunk.length) {
-                  // Get chunk buffer and convert it to the HTML string.
-                  var data = chunk.toString();
-                  // Create file & write content.
-                  fs.appendFile(join(__dirname, _dir, filename), data, function(error) {
-                    if (error) {
-                      throw new Error(format('%s'.red, error));
-                    }
-                  });
-                }
-              })
-              // Response - end event.
-              .on('end', function() {
-                console.log('%s/%s has been added.'.green, _dir, filename);
-              });
+              // Log error.
+              console.error(error);
+            })
+            // Response - data event - Get HTML content.
+            .on('data', function(chunk) {
+              if (chunk.length) {
+                // Get chunk buffer and convert it to the HTML string.
+                var data = chunk.toString();
+                // Create file & write content.
+                fs.appendFile(join(__dirname, _dir, filename), data, function(error) {
+                  if (error) {
+                    throw new Error(format('%s'.red, error));
+                  }
+                });
+              }
+            })
+            // Response - end event.
+            .on('end', function() {
+              console.log('%s/%s has been added.'.green, _dir, filename);
+            });
           }).end();
         });
       });
