@@ -27,10 +27,12 @@ module.exports = function(file, files, callback) {
     (function(_callback) {
       files.push(file);
       files.forEach(function(file) {
+        // Get file stats.
         fs.lstat(file, function(error, stats) {
           if (error) {
             throw new Error(format('%s'.red, error));
           }
+          // Remove slash.
           file = file.replace(/\/$/, '');
           // Case path is directory.
           // Get all files from directory.
@@ -41,22 +43,25 @@ module.exports = function(file, files, callback) {
               if (error) {
                 throw new Error(format('%s'.red, error));
               }
-              // Update files value setting full path.
+              // Update files path.
               _files.forEach(function(_file, key, _files) {
                 _files[key] = join(file, _file);
               });
+              // callback - passing files.
               _callback(_files);
             });
           }
           else {
+            // callback - passing files.
             _callback([file]);
           }
         });
       });
     })(function(files) {
       files.forEach(function(file) {
-        // Check file extension.
-        if (/[a-zA-Z]+(([\-_])?[0-9]+)?\.html/.test(file)) {
+        // Check file extension (.html).
+        if (/[a-zA-Z]+(([\-_])?[0-9]+)?\.html$/.test(file)) {
+          // callback - passing file.
           callback(file);
         }
         else {

@@ -4,10 +4,10 @@
  * @file a11y-audit.js
  * @author Lasha Badashvili
  *
- * Scan HTML files (Standard - WCAG2A).
+ * Scan HTML files (using pa11y module).
  */
 
- 'use strict';
+'use strict';
 
 /**
  * Module dependencies.
@@ -29,15 +29,14 @@ try {
   // Arguments condition.
   var condition = !_report || !path;
   if (condition) {
-    // Throws error (--path or --report argument is missing).
     throw new Error('arguments are missing a11y-audit --path [path/to/file(s)] --report [path/to/report]'.red);
   }
-  // Get files.
+  // Get file(s).
   files(path, argv._, function(file) {
-    // Test file(s).
+    // Test file.
     _pa11y(file, function(data) {
       // Create report.
-      report(data, _report, 'report.json');
+      report(data, _report, 'a11y-report.json');
     });
   });
 }
@@ -67,11 +66,11 @@ var _pa11y = function(file, callback) {
       throw new Error(format('%s'.red, error));
     }
     if (data.length) {
-      // Push all report object in _data object.
+      // Push result in _data variable.
       data.forEach(function(object) {
         _data.push(object);
       });
-      // Calling callback - passing data object.
+      // callback - passing _data object.
       callback(_data);
     }
   });
