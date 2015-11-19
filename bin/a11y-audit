@@ -26,22 +26,40 @@ try {
   var path = argv.path;
   // Get report directory.
   var _report = argv.report;
-  // Set length.
-  var _length = 1;
-  // Arguments condition.
-  var condition = !_report || !path;
-  if (condition) {
-    throw new Error('Arguments are missing a11y-audit --path [path/to/file(s)] --report [path/to/report]'.red);
+  // Get standard.
+  var standard = argv.standard;
+  if (!_report || !path || !standard) {
+    throw new Error('Arguments are missing a11y-audit --path [path/to/file(s)] --report [path/to/report] --standard [STANDARD]'.red);
   }
+  // Prepare pa11y options.
+  var options = {
+    standard: standard,
+    ignore: [
+      'notice',
+      'warning'
+    ]
+  };
+  var i = 1;
   // Get file(s).
   files(path, argv._, function(file, length) {
+    // Log file scanning.
+    console.log('Scanning %s'.green, file);
     // Test file.
-    _pa11y(file, function(data) {
-      if (_length === length) {
-        // Create report.
-        report(data, _report, 'a11y-report.json');
+    pa11y(options).run(format('file:%s', file), function(error, data) {
+      if (error) {
+        throw new Error(format('%s'.red, error));
       }
-      _length++;
+      if (data.length) {
+        // Push result in _data variable.
+        data.forEach(function(object) {
+          _data.push(object);
+        });
+        if (i === length) {
+          // Create report.
+          report(_data, _report, 'a11y-report.json');
+        }
+        i++;
+      }
     });
   });
 }
@@ -49,34 +67,3 @@ catch (e) {
   // Log exception message.
   console.error(e.message);
 }
-
-/**
- * @callback _pa11y - Executing pa11y.
- *
- * @param {String} file
- * @param {Function} callback
- */
-var _pa11y = function(file, callback) {
-  // Prepare pa11y options.
-  var options = {
-    standard: 'WCAG2A',
-    ignore: [
-      'notice',
-      'warning'
-    ]
-  };
-  // Test file.
-  pa11y(options).run(format('file:%s', file), function(error, data) {
-    if (error) {
-      throw new Error(format('%s'.red, error));
-    }
-    if (data.length) {
-      // Push result in _data variable.
-      data.forEach(function(object) {
-        _data.push(object);
-      });
-      // callback - passing _data object.
-      callback(_data);
-    }
-  });
-};

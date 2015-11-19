@@ -49,27 +49,27 @@ module.exports = function(file, files, callback) {
               _files.forEach(function(_file, key, _files) {
                 _files[key] = join(file, _file);
               });
-              // callback - passing files.
               _callback(_files);
             });
           }
           else {
-            // callback - passing files.
             _callback(files);
           }
         });
-
         break;
       }
     })(function(files) {
-      files.forEach(function(file) {
-        // Check file extension (.html).
+      var i = files.length;
+      while(i--) {
+        var file = files[i];
         if (!/[a-zA-Z]+(([\-_])?[0-9]+)?\.html$/.test(file)) {
           // Remove non-.html file from files.
           files.splice(files.indexOf(file), 1);
           // Skip & log non-.html files.
-          console.error(format('skip %s file.'.red, file));
+          console.error(format('Skip %s file.'.red, file));
         }
+      }
+      files.forEach(function(file) {
         callback(file, files.length);
       });
     });
@@ -78,4 +78,4 @@ module.exports = function(file, files, callback) {
     // Log exception message.
     console.error(e.message);
   }
-}
+};

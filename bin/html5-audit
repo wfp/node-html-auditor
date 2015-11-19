@@ -27,55 +27,40 @@ try {
   var path = argv.path;
   // Get report directory.
   var _report = argv.report;
-  // Set length.
-  var _length = 1;
-  // Arguments condition.
-  var condition = !_report || !path;
-  if (condition) {
+  if (!_report || !path) {
     throw new Error('Arguments are missing html5-audit --path [path/to/file(s)] --report [path/to/report]'.red);
   }
+  var i = 1;
   // Get file(s).
   files(path, argv._, function(file, length) {
-    // Test file.
-    _html5Lint(file, function(data) {
-      if (_length === length) {
-        // Create report.
-        report(data, _report, 'html5-report.json');
+    // Log file scanning.
+    console.log('Scanning %s'.green, file);
+    // Get content.
+    fs.readFile(file, 'utf-8', function(error, file) {
+      if (error) {
+        throw new Error(format('%s'.red, error));
       }
-      length++;
+      // Test file.
+      html5Lint(file, function(error, data) {
+        if (error) {
+          throw new Error(format('%s'.red, error));
+        }
+        if (data.messages.length) {
+          // Store result in _data variable.
+          data.messages.forEach(function(object) {
+            _data.push(object);
+          });
+          if (i === length) {
+            // Create report.
+            report(_data, _report, 'html5-report.json');
+          }
+          i++;
+        }
+      });
     });
   });
 }
 catch (e) {
   // Log exception message.
   console.error(e.message);
-};
-
-/**
- * @callback _html5Lint - Executing html5Lint.
- *
- * @param {String} file
- * @param {Function} callback
- */
-var _html5Lint = function(file, callback) {
-  // Get content.
-  fs.readFile(file, 'utf-8', function(error, file) {
-    if (error) {
-      throw new Error(format('%s'.red, error));
-    }
-    // html5Lint - Test file.
-    html5Lint(file, function(error, data) {
-      if (error) {
-        throw new Error(format('%s'.red, error));
-      }
-      if (data.messages.length) {
-        // Store result in _data variable.
-        data.messages.forEach(function(object) {
-          _data.push(object);
-        });
-        // callback - passing _data object.
-        callback(_data);
-      }
-    });
-  });
 };

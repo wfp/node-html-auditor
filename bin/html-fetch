@@ -27,9 +27,7 @@ try {
   var uri = argv.uri;
   // Get directory.
   var dir = argv.dir;
-  // Arguments condition.
-  var condition = !uri || !dir;
-  if (condition) {
+  if (!uri || !dir) {
     throw new Error('Arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
   }
   // Get dir stats.
@@ -119,4 +117,4 @@ function download(sitemap, key, callback) {
       }, 1000);
     })
   }).end();
-}
+};

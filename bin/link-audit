@@ -31,13 +31,11 @@ try {
   var uri = argv['base-uri'];
   // Regex for uri.
   var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-  // Arguments condition.
-  var condition = !_report || !path || !uri;
-  if (condition) {
+  if (!path || !_report || !uri) {
     throw new Error('Arguments are missing link-audit --path [path/to/file(s)] --report [path/to/report] --base-uri [URI]'.red);
   }
   if (!regex.test(uri)) {
-    throw new Error(format('You entered incorrect base uri --base-uri %s'.red, uri));
+    throw new Error(format('You entered incorrect base uri --base-uri=%s'.red, uri));
   }
   // Get file(s).
   files(path, argv._, function(file) {
@@ -59,7 +57,7 @@ catch (e) {
 /**
  * @instance Create BLC instance.
  */
-var html = new BLC.HtmlChecker({}, {
+var html = new BLC.HtmlChecker({ filterLevel: 3 }, {
   link: function(result) {
     // Store result in _data variable.
     _data.push(result);
@@ -67,7 +65,12 @@ var html = new BLC.HtmlChecker({}, {
     console.log('Scanning %s'.green, result.url.original);
   },
   complete: function() {
-    // Create report.
-    report(_data, _report, 'links-report.json');
+    if (_data.length) {
+      // Create report.
+      report(_data, _report, 'links-report.json');
+    }
+    else {
+      console.log('data not found.'.red);
+    }
   }
 });
