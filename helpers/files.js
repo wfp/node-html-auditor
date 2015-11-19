@@ -26,7 +26,9 @@ module.exports = function(file, files, callback) {
   try {
     (function(_callback) {
       files.push(file);
-      files.forEach(function(file) {
+      for (var i in files) {
+        // Get file.
+        file = files[i];
         // Get file stats.
         fs.lstat(file, function(error, stats) {
           if (error) {
@@ -53,21 +55,22 @@ module.exports = function(file, files, callback) {
           }
           else {
             // callback - passing files.
-            _callback([file]);
+            _callback(files);
           }
         });
-      });
+
+        break;
+      }
     })(function(files) {
       files.forEach(function(file) {
         // Check file extension (.html).
-        if (/[a-zA-Z]+(([\-_])?[0-9]+)?\.html$/.test(file)) {
-          // callback - passing file.
-          callback(file);
-        }
-        else {
+        if (!/[a-zA-Z]+(([\-_])?[0-9]+)?\.html$/.test(file)) {
+          // Remove non-.html file from files.
+          files.splice(files.indexOf(file), 1);
           // Skip & log non-.html files.
           console.error(format('skip %s file.'.red, file));
         }
+        callback(file, files.length);
       });
     });
   }

@@ -26,17 +26,22 @@ try {
   var path = argv.path;
   // Get report directory.
   var _report = argv.report;
+  // Set length.
+  var _length = 1;
   // Arguments condition.
   var condition = !_report || !path;
   if (condition) {
-    throw new Error('arguments are missing a11y-audit --path [path/to/file(s)] --report [path/to/report]'.red);
+    throw new Error('Arguments are missing a11y-audit --path [path/to/file(s)] --report [path/to/report]'.red);
   }
   // Get file(s).
-  files(path, argv._, function(file) {
+  files(path, argv._, function(file, length) {
     // Test file.
     _pa11y(file, function(data) {
-      // Create report.
-      report(data, _report, 'a11y-report.json');
+      if (_length === length) {
+        // Create report.
+        report(data, _report, 'a11y-report.json');
+      }
+      _length++;
     });
   });
 }
