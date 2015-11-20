@@ -25,3 +25,7 @@ a11y-audit --path [path/to/folder/file.html path/to/folder/file-1.html ... ] --r
 html5-audit --path [path/to/folder] --report [path/to/report]
 html5-audit --path [path/to/folder/file.html] --report [path/to/report]
 html5-audit --path [path/to/folder/file.html path/to/folder/file-1.html ... ] --report [path/to/report]
+
+link-audit --path [path/to/folder] --report [path/to/report] --base-uri [BASE URI]
+link-audit --path [path/to/folder/file.html] --report [path/to/report] --base-uri [BASE URI]
+link-audit --path [path/to/folder/file.html path/to/folder/file-1.html ... ] --report [path/to/report] --base-uri [BASE URI]
