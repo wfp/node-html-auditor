@@ -13,6 +13,7 @@
  * Module dependencies.
  */
 var format = require('util').format;
+var url = require('url');
 var fs = require('fs');
 var colors = require('colors');
 var argv = require('yargs').argv;
@@ -59,18 +60,40 @@ catch (e) {
  */
 var html = new BLC.HtmlChecker({ filterLevel: 3 }, {
   link: function(result) {
-    // Store result in _data variable.
-    _data.push(result);
-    // Log links scanning.
-    console.log('Scanning %s'.green, result.url.original);
+    // Get original url.
+    var url = result.url.original;
+    // Get base original url.
+    var base = result.base.original;
+    // Get links with 404 response.
+    // Get links which has tag a & has base uri in href.
+    // Get links which has internal & redirected property true.
+    var condition = result.error
+      || result.http.statusCode === 404
+      || (result.html.tagName === 'a' && result.url.original.search(base) > -1)
+      || (result.internal && result.url.redirected);
+    if (condition) {
+      // Log.
+      console.error('Errors found for %s'.red, url);
+      // Store result in _data variable.
+      _data.push(result);
+    }
+    else {
+      // Log.
+      console.log('%s passed scan test successfuly.'.green, url);
+    }
   },
   complete: function() {
-    if (_data.length) {
+    // Get _data variable length.
+    var length = _data.length;
+    if (length) {
+      // Log.
+      console.error('%d errors found.'.red, length);
       // Create report.
       report(_data, _report, 'links-report.json');
     }
     else {
-      console.log('data not found.'.red);
+      // Log.
+      console.log('Congrats! 0 errors found.'.green);
     }
   }
 });
