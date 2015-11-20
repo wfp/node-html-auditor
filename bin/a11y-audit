@@ -2,7 +2,7 @@
 
 /**
  * @file a11y-audit.js
- * @author Lasha Badashvili
+ * @author Lasha Badashvili (lashab@picktek.com)
  *
  * Scan HTML files (using pa11y module).
  */
@@ -66,4 +66,4 @@ try {
 catch (e) {
   // Log exception message.
   console.error(e.message);
-}
+};

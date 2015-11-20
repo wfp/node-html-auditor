@@ -2,7 +2,7 @@
 
 /**
  * @file html-fetch.js
- * @author Lasha Badashvili
+ * @author Lasha Badashvili (lashab@picktek.com)
  *
  * Fetches sitemap.xml URIs & downloading HTML content.
  */

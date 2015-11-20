@@ -1,6 +1,6 @@
 /**
  * @file files.js
- * @author Lasha Badashvili
+ * @author Lasha Badashvili (lashab@picktek.com)
  *
  * Get HTML file(s) from directory.
  */

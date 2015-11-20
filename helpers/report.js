@@ -1,6 +1,6 @@
 /**
  * @file report.js
- * @author Lasha Badashvili
+ * @author Lasha Badashvili (lashab@picktek.com)
  *
  * Create report JSON file.
  */

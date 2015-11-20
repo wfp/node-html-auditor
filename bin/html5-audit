@@ -2,7 +2,7 @@
 
 /**
  * @file html5-audit.js
- * @author Lasha Badashvili
+ * @author Lasha Badashvili (lashab@picktek.com)
  *
  * Scan HTML files (using html5-lint module).
  */

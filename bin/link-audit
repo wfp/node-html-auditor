@@ -2,7 +2,7 @@
 
 /**
  * @file html5-audit.js
- * @author Lasha Badashvili
+ * @author Lasha Badashvili (lashab@picktek.com)
  *
  * Scan HTML links (using broken-link-checker module).
  */
@@ -65,6 +65,7 @@ catch (e) {
 var check = function(file) {
   return new BLC.HtmlChecker({ filterLevel: 3 }, {
     link: function(result) {
+      var verbose = argv['report-verbose'] || '';
       var condition = true;
       var error = '';
       // Get original url.
@@ -97,6 +98,10 @@ var check = function(file) {
           html: result.html.tag,
           url: url
         };
+        if (verbose) {
+          // Append entire result.
+          _result['verbose'] = result;
+        }
         // Store result in _data variable.
         _data.push(_result);
         // Log.
