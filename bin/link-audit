@@ -91,7 +91,6 @@ var check = function(file) {
         condition = false;
       }
       if (condition) {
-        //
         var _result = {
           error: error,
           filename: file,
