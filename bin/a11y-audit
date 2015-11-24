@@ -1,0 +1,69 @@
+#! /usr/bin/env node
+
+/**
+ * @file a11y-audit.js
+ * @author Lasha Badashvili (lashab@picktek.com)
+ *
+ * Scan HTML files (using pa11y module).
+ */
+
+'use strict';
+
+/**
+ * Module dependencies.
+ */
+var format = require('util').format;
+var colors = require('colors');
+var pa11y = require('pa11y');
+var argv = require('yargs').argv;
+var report = require('../helpers/report');
+var files = require('../helpers/files');
+
+var _data = [];
+
+try {
+  // Get path to file.
+  var path = argv.path;
+  // Get report directory.
+  var _report = argv.report;
+  // Get standard.
+  var standard = argv.standard;
+  if (!_report || !path || !standard) {
+    throw new Error('Arguments are missing a11y-audit --path [path/to/file(s)] --report [path/to/report] --standard [STANDARD]'.red);
+  }
+  // Prepare pa11y options.
+  var options = {
+    standard: standard,
+    ignore: [
+      'notice',
+      'warning'
+    ]
+  };
+  var i = 1;
+  // Get file(s).
+  files(path, argv._, function(file, length) {
+    // Log file scanning.
+    console.log('Scanning %s'.green, file);
+    // Test file.
+    pa11y(options).run(format('file:%s', file), function(error, data) {
+      if (error) {
+        throw new Error(format('%s'.red, error));
+      }
+      if (data.length) {
+        // Push result in _data variable.
+        data.forEach(function(object) {
+          _data.push(object);
+        });
+        if (i === length) {
+          // Create report.
+          report(_data, _report, 'a11y-report.json');
+        }
+        i++;
+      }
+    });
+  });
+}
+catch (e) {
+  // Log exception message.
+  console.error(e.message);
+};

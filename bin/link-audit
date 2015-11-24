@@ -1,0 +1,139 @@
+#! /usr/bin/env node
+
+/**
+ * @file html5-audit.js
+ * @author Lasha Badashvili (lashab@picktek.com)
+ *
+ * Scan HTML links (using broken-link-checker module).
+ */
+
+'use strict';
+
+/**
+ * Module dependencies.
+ */
+var format = require('util').format;
+var url = require('url');
+var fs = require('fs');
+var colors = require('colors');
+var argv = require('yargs').argv;
+var _ = require('underscore');
+var report = require('../helpers/report');
+var files = require('../helpers/files');
+var BLC = require('broken-link-checker');
+
+var _data = [];
+
+try {
+  // Get path to file.
+  var path = argv.path;
+  // Get report directory.
+  var _report = argv.report;
+  // Get base uri.
+  var uri = argv['base-uri'];
+  // Regex for uri.
+  var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+  if (!path || !_report || !uri) {
+    throw new Error('Arguments are missing link-audit --path [path/to/file(s)] --report [path/to/report] --base-uri [URI]'.red);
+  }
+  if (!regex.test(uri)) {
+    throw new Error(format('You entered incorrect base uri --base-uri=%s'.red, uri));
+  }
+  // Get file(s).
+  files(path, argv._, function(file) {
+    // Get content.
+    fs.readFile(file, 'utf-8', function(error, content) {
+      if (error) {
+        throw new Error(format('%s'.red, error));
+      }
+      // Test file.
+      check(file).scan(content, uri);
+    });
+  });
+}
+catch (e) {
+  // Log exception message.
+  console.error(e.message);
+};
+
+/**
+ * @callback check - Test file.
+ *
+ * @param {String} file
+ * @return {Object} new BLC instance.
+ */
+var check = function(file) {
+  return new BLC.HtmlChecker({ filterLevel: 3 }, {
+    link: function(result) {
+      var verbose = argv['report-verbose'] || '';
+      var condition = true;
+      var error = '';
+      // Get original url.
+      var url = result.url;
+      // Get base original url.
+      var base = result.base.original;
+      // Get links with 404 response.
+      // Get links which has tag a & has base uri in href.
+      // Get links which has internal & redirected property true.
+      // Set proper error message.
+      if (result.error) {
+        error = result.error;
+      }
+      else if (result.http.statusCode === 404) {
+        error = 'Link page not found';
+      }
+      else if (result.html.tagName === 'a' && url.original.search(base) > -1) {
+        error  = 'Absolute internal URL';
+      }
+      else if (result.internal && url.redirected) {
+        error = 'Internal redirect';
+      }
+      else {
+        condition = false;
+      }
+      if (condition) {
+        var _result = {
+          error: error,
+          filename: file,
+          html: result.html.tag,
+          url: url
+        };
+        if (verbose) {
+          // Append entire result.
+          _result['verbose'] = result;
+        }
+        // Store result in _data variable.
+        _data.push(_result);
+        // Log.
+        console.error('Errors found for %s'.red, url.original);
+      }
+      else {
+        // Log.
+        console.log('%s passed scan test successfuly.'.green, url.original);
+      }
+    },
+    complete: function() {
+      // Get _data variable length.
+      var length = _data.length;
+      if (length) {
+        // Group by filename.
+        // Omit filename property.
+        _data = _.groupBy(_data, 'filename');
+        for (var i in _data) {
+          for (var j in _data[i]) {
+            _data[i][j] = _.omit(_data[i][j], 'filename');
+
+          }
+        }
+        // Create report.
+        report(_data, _report, 'links-report.json');
+        // Log.
+        console.error('%d errors found.'.red, length);
+      }
+      else {
+        // Log.
+        console.log('Congrats! 0 errors found.'.green);
+      }
+    }
+  });
+};
