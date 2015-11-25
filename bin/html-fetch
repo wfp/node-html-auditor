@@ -1,11 +1,11 @@
 #! /usr/bin/env node
 
 /**
- * @file html-fetch.js
- * @author Lasha Badashvili (lashab@picktek.com)
- *
- * Fetches sitemap.xml URIs & downloading HTML content.
- */
+* @file html-fetch.js
+* @author Lasha Badashvili (lashab@picktek.com)
+*
+* Fetches sitemap.xml URIs & downloading HTML content.
+*/
 
 'use strict';
 
@@ -13,14 +13,15 @@
  * Module dependencies.
  */
 var format = require('util').format;
+var stream = require('stream');
 var http = require('http');
 var join = require('path').join;
+var url = require('url');
 var fs = require('fs');
+var XMLStream = require('xml-stream');
 var colors = require('colors');
 var smta = require('sitemap-to-array');
 var argv = require('yargs').argv;
-
-var _uris = [];
 
 try {
   // Get uri.
@@ -43,23 +44,25 @@ try {
       uri = condition ? uri : (function() {
         throw new Error(format('%s isn\'t valid uri, please provide correct --uri argument.'.red, uri));
       })();
-      // Parse sitemap XML.
-      smta(uri, function(error, sitemaps) {
-        if (error) {
-          throw new Error(format('%s'.red, error));
-        }
-        sitemaps.forEach(function(sitemap, key) {
-          // Extract all the sitemap URL.
-          // Do http call for each of the URL & get HTML content.
-          // Create unique filename and append file with the HTML content.
-          download(sitemap, key, function(uri) {
-            // Store uri in _uris variable.
-            _uris.push(uri);
-            if (sitemaps.length === _uris.length) {
-              // Log when done.
-              console.log('Download has completed.'.green);
-              process.exit();
-            }
+      var i = 0;
+      // Get http | https.
+      var _http = url.parse(uri).protocol.split(':')[0] || 'http';
+      // Get sitemap content.
+      require(_http).get(uri, function(response) {
+        var data = '';
+        response.on('data', function(string) {
+          data += string;
+        })
+        .on('end', function() {
+          var _stream = new stream.PassThrough();
+          // Write your buffer
+          _stream.end(data);
+          var XML = new XMLStream(_stream);
+          XML.on('endElement: loc', function(item) {
+            // Do http call for each of the URL & get HTML content.
+            // Create unique filename and append file with the HTML content.
+            download(item.$text, i);
+            i++;
           });
         });
       });
@@ -77,19 +80,17 @@ catch (e) {
 /**
  * @callback download - Get HTML content & store in file.
  *
- * @param {Object} sitemap
+ * @param {String} url
  * @param {Number} key
  * @param {Function} callback
  */
-function download(sitemap, key, callback) {
+function download(url, key) {
   // Create unique filename.
   var filename = format('sitemap-%d.html', key);
   // Get directory.
   var _dir = dir.replace(/\/$/, '');
-  // Get sitemap URL.
-  var _url = sitemap.loc;
   // HTTP call.
-  http.get(_url, function(response) {
+  http.get(url, function(response) {
     // Response - error event.
     response.on('error', function(error) {
       if (error) {
@@ -110,11 +111,8 @@ function download(sitemap, key, callback) {
       }
     })
     .on('end', function() {
-      // Log files.
+      // Log.
       console.log('%s has been added.', filename.green);
-      setTimeout(function() {
-        callback(filename);
-      }, 1000);
-    })
+    });
   }).end();
 };
