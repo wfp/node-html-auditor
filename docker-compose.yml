@@ -1,6 +1,6 @@
-api: 
+api:
   build: .
   volumes:
-    - .:/opt/application  
+    - .:/opt/application
   ports:
    - "5000:3000"
