@@ -57,7 +57,7 @@ try {
         });
       }).on('error', function(error) {
         throw new Error(format('%s'.red, error));
-      });
+      }).end();
     }
     else {
       throw new Error('Directory %s couldn\'t be found.'.red);
@@ -97,5 +97,5 @@ function download(url, key) {
     // Stream - close.
     stream.close();
     throw new Error(format('%s'.red, error));
-  });
+  }).end();
 };

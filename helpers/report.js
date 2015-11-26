@@ -47,9 +47,9 @@ module.exports = function(data, report, file) {
       stream.write(JSON.stringify(data));
       // Stream - finish event.
       stream.on('finish', function() {
-        // Log when finishes writing.
-        console.log('Writing report in %s/%s'.green, report, file);
-      }).end();
+        // Stream - end.
+        stream.end();
+      });
     }
   });
 };
