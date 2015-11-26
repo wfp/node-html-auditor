@@ -82,9 +82,7 @@ function download(url, key) {
   // Get directory.
   var dirctory = dir.replace(/\/$/, '');
   // Create write stream.
-  var stream = fs.createWriteStream(join(dirctory, filename), {
-    flags: 'a'
-  });
+  var stream = fs.createWriteStream(join(dirctory, filename));
   // Do HTTP call for each of the URL & get HTML content.
   // Write HTML content in file.
   request(url).on('data', function(data) {

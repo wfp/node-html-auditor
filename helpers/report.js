@@ -38,7 +38,7 @@ module.exports = function(data, report, file) {
     }
     if (stats.isDirectory()) {
       // Stream - create file.
-      var stream = fs.createWriteStream(join('.', report, file));
+      var stream = fs.createWriteStream(join(report, file));
       // Stream - error event.
       stream.on('error', function(error) {
         throw new Error(format('%s'.red, error));

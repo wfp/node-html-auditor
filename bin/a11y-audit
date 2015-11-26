@@ -45,7 +45,7 @@ try {
     // Log file scanning.
     console.log('Scanning %s'.green, file);
     // Test file.
-    pa11y(options).run(format('file:%s', file), function(error, data) {
+    pa11y(options).run(format('file://%s', file), function(error, data) {
       if (error) {
         throw new Error(format('%s'.red, error));
       }
