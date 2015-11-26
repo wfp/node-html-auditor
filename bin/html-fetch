@@ -1,11 +1,11 @@
 #! /usr/bin/env node
 
 /**
-* @file html-fetch.js
-* @author Lasha Badashvili (lashab@picktek.com)
-*
-* Fetches sitemap.xml URIs & downloading HTML content.
-*/
+ * @file html-fetch.js
+ * @author Lasha Badashvili (lashab@picktek.com)
+ *
+ * Fetches sitemap URIs & downloads HTML content.
+ */
 
 'use strict';
 
@@ -14,13 +14,11 @@
  */
 var format = require('util').format;
 var stream = require('stream');
-var http = require('http');
 var join = require('path').join;
-var url = require('url');
 var fs = require('fs');
 var XMLStream = require('xml-stream');
+var request = require('request');
 var colors = require('colors');
-var smta = require('sitemap-to-array');
 var argv = require('yargs').argv;
 
 try {
@@ -31,40 +29,34 @@ try {
   if (!uri || !dir) {
     throw new Error('Arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
   }
-  // Get dir stats.
+  // Get directory stats.
   fs.lstat(dir, function(error, stats) {
     if (error) {
       throw new Error(format('%s'.red, error));
     }
     if (stats.isDirectory()) {
-      // Regex for uri.
       var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-      // Check for sitemap URI validness.
-      var condition = uri && regex.test(uri) && uri.indexOf('sitemap') > -1;
-      uri = condition ? uri : (function() {
+      var data = '';
+      var i = 0;
+      // Check URI.
+      uri = uri && regex.test(uri) ? uri : (function() {
         throw new Error(format('%s isn\'t valid uri, please provide correct --uri argument.'.red, uri));
       })();
-      var i = 0;
-      // Get http | https.
-      var _http = url.parse(uri).protocol.split(':')[0] || 'http';
-      // Get sitemap content.
-      require(_http).get(uri, function(response) {
-        var data = '';
-        response.on('data', function(string) {
-          data += string;
-        })
-        .on('end', function() {
-          var _stream = new stream.PassThrough();
-          // Write your buffer
-          _stream.end(data);
-          var XML = new XMLStream(_stream);
-          XML.on('endElement: loc', function(item) {
-            // Do http call for each of the URL & get HTML content.
-            // Create unique filename and append file with the HTML content.
-            download(item.$text, i);
-            i++;
-          });
+      // Do HTTP call for sitemap XML URI.
+      request(uri).on('data', function(string) {
+        data += string;
+      }).on('end', function() {
+        var _stream = new stream.PassThrough();
+        // Store data.
+        _stream.end(data);
+        var XML = new XMLStream(_stream);
+        XML.on('endElement: loc', function(item) {
+          // Download HTML content.
+          download(item.$text, i);
+          i++;
         });
+      }).on('error', function(error) {
+        throw new Error(format('%s'.red, error));
       });
     }
     else {
@@ -73,9 +65,9 @@ try {
   });
 }
 catch (e) {
-  // Log exception message.
+  // Log exception.
   console.error(e.message);
-}
+};
 
 /**
  * @callback download - Get HTML content & store in file.
@@ -88,31 +80,24 @@ function download(url, key) {
   // Create unique filename.
   var filename = format('sitemap-%d.html', key);
   // Get directory.
-  var _dir = dir.replace(/\/$/, '');
-  // HTTP call.
-  http.get(url, function(response) {
-    // Response - error event.
-    response.on('error', function(error) {
-      if (error) {
-        throw new Error(format('%s'.red, error));
-      }
-    })
-    // Response - data event - Get HTML content.
-    .on('data', function(chunk) {
-      if (chunk.length) {
-        // Get chunk buffer and convert it to the HTML string.
-        var data = chunk.toString();
-        // Create file & write content.
-        fs.appendFile(join('.', _dir, filename), data, function(error) {
-          if (error) {
-            throw new Error(format('%s'.red, error));
-          }
-        });
-      }
-    })
-    .on('end', function() {
-      // Log.
-      console.log('%s has been added.', filename.green);
-    });
-  }).end();
+  var dirctory = dir.replace(/\/$/, '');
+  // Create write stream.
+  var stream = fs.createWriteStream(join(dirctory, filename), {
+    flags: 'a'
+  });
+  // Do HTTP call for each of the URL & get HTML content.
+  // Write HTML content in file.
+  request(url).on('data', function(data) {
+    // Write stream.
+    stream.write(data);
+  }).on('end', function() {
+    // Stream - end.
+    stream.end();
+    // Log filename.
+    console.log('%s has been added.', filename.green);
+  }).on('error', function(error) {
+    // Stream - close.
+    stream.close();
+    throw new Error(format('%s'.red, error));
+  });
 };
