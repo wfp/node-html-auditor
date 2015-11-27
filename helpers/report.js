@@ -38,7 +38,7 @@ module.exports = function(data, report, file) {
     }
     if (stats.isDirectory()) {
       // Stream - create file.
-      var stream = fs.createWriteStream(join('.', report, file));
+      var stream = fs.createWriteStream(join(report, file));
       // Stream - error event.
       stream.on('error', function(error) {
         throw new Error(format('%s'.red, error));
@@ -47,9 +47,9 @@ module.exports = function(data, report, file) {
       stream.write(JSON.stringify(data));
       // Stream - finish event.
       stream.on('finish', function() {
-        // Log when finishes writing.
-        console.log('Writing report in %s/%s'.green, report, file);
-      }).end();
+        // Stream - end.
+        stream.end();
+      });
     }
   });
 };

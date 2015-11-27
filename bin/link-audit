@@ -118,15 +118,15 @@ var check = function(file) {
       if (length) {
         // Group by filename.
         // Omit filename property.
-        _data = _.groupBy(_data, 'filename');
-        for (var i in _data) {
-          for (var j in _data[i]) {
-            _data[i][j] = _.omit(_data[i][j], 'filename');
+        var data = _.groupBy(_data, 'filename');
+        for (var i in data) {
+          for (var j in data[i]) {
+            data[i][j] = _.omit(data[i][j], 'filename');
 
           }
         }
         // Create report.
-        report(_data, _report, 'links-report.json');
+        report(data, _report, 'links-report.json');
         // Log.
         console.error('%d errors found.'.red, length);
       }

@@ -13,13 +13,15 @@
  * Module dependencies.
  */
 var format = require('util').format;
+var path = require('path');
 var colors = require('colors');
+var async = require('async');
 var pa11y = require('pa11y');
 var argv = require('yargs').argv;
 var report = require('../helpers/report');
 var files = require('../helpers/files');
 
-var _data = [];
+var _data = {};
 
 try {
   // Get path to file.
@@ -37,30 +39,31 @@ try {
     ignore: [
       'notice',
       'warning'
-    ]
+    ],
+    log: {
+      debug: console.log.bind(console),
+      error: console.error.bind(console),
+      info: console.info.bind(console)
+    }
   };
   var i = 1;
+  // Instantiate pa11y.
+  var _patty = pa11y(options);
   // Get file(s).
   files(path, argv._, function(file, length) {
-    // Log file scanning.
-    console.log('Scanning %s'.green, file);
-    // Test file.
-    pa11y(options).run(format('file:%s', file), function(error, data) {
-      if (error) {
-        throw new Error(format('%s'.red, error));
-      }
-      if (data.length) {
-        // Push result in _data variable.
-        data.forEach(function(object) {
-          _data.push(object);
-        });
-        if (i === length) {
-          // Create report.
-          report(_data, _report, 'a11y-report.json');
+    // Prepare _data object.
+    _data[file] = _patty.run.bind(_patty, format('file://%s', file));
+    if (i === length) {
+      // Test file(s).
+      async.series(_data, function(error, data) {
+        if (error) {
+          throw new Error(format('%s'.red, error));
         }
-        i++;
-      }
-    });
+        // Create report.
+        report(data, _report, 'a11y-report.json');
+      });
+    }
+    i++;
   });
 }
 catch (e) {
