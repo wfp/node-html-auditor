@@ -30,16 +30,17 @@ try {
   var _report = argv.report;
   // Get standard.
   var standard = argv.standard;
-  if (!_report || !path || !standard) {
-    throw new Error('Arguments are missing a11y-audit --path [path/to/file(s)] --report [path/to/report] --standard [STANDARD]'.red);
+  // Get ignore.
+  var ignore = argv.ignore;
+  if (!_report || !path || !standard || !ignore) {
+    throw new Error('Arguments are missing a11y-audit --path [path/to/file(s)] --report [path/to/report] --standard [STANDARD] --ignore notice;warning'.red);
   }
+  // Get ignore object.
+  ignore = ignore.split(';');
   // Prepare pa11y options.
   var options = {
     standard: standard,
-    ignore: [
-      'notice',
-      'warning'
-    ],
+    ignore: ignore,
     log: {
       debug: console.log.bind(console),
       error: console.error.bind(console),
