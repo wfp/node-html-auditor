@@ -53,7 +53,7 @@ try {
 }
 catch (e) {
   // Log exception message.
-  console.error(e.message);
+  console.log(e.message);
 };
 
 /**
@@ -105,7 +105,7 @@ var check = function(file) {
         // Store result in _data variable.
         _data.push(_result);
         // Log.
-        console.error('Errors found for %s'.red, url.original);
+        console.log('Errors found for %s'.red, url.original);
       }
       else {
         // Log.
@@ -128,7 +128,7 @@ var check = function(file) {
         // Create report.
         report(data, _report, 'links-report.json');
         // Log.
-        console.error('%d errors found.'.red, length);
+        console.log('%d errors found.'.red, length);
       }
       else {
         // Log.

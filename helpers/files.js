@@ -66,7 +66,7 @@ module.exports = function(file, files, callback) {
           // Remove non-.html file from files.
           files.splice(files.indexOf(file), 1);
           // Skip & log non-.html files.
-          console.error(format('Skip %s file.'.red, file));
+          console.log(format('Skip %s file.'.red, file));
         }
       }
       files.forEach(function(file) {
@@ -76,6 +76,6 @@ module.exports = function(file, files, callback) {
   }
   catch (e) {
     // Log exception message.
-    console.error(e.message);
+    console.log(e.message);
   }
 };

@@ -68,5 +68,5 @@ try {
 }
 catch (e) {
   // Log exception message.
-  console.error(e.message);
+  console.log(e.message);
 };
