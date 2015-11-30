@@ -1,4 +1,4 @@
-# node-pa11y-auditor
+# node-html-auditor
 
 ## Installation
 

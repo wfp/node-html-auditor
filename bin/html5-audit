@@ -27,25 +27,29 @@ try {
   var path = argv.path;
   // Get report directory.
   var _report = argv.report;
+  // Get errors only.
+  var errorsOnly = argv['errors-only'] || false;
   if (!_report || !path) {
     throw new Error('Arguments are missing html5-audit --path [path/to/file(s)] --report [path/to/report]'.red);
   }
   var i = 1;
   // Get file(s).
   files(path, argv._, function(file, length) {
-    // Log file scanning.
-    console.log('Scanning %s'.green, file);
     // Get content.
-    fs.readFile(file, 'utf-8', function(error, file) {
+    fs.readFile(file, 'utf-8', function(error, content) {
       if (error) {
         throw new Error(format('%s'.red, error));
       }
       // Test file.
-      html5Lint(file, function(error, data) {
+      html5Lint(content, {
+        errorsOnly: errorsOnly
+      }, function(error, data) {
         if (error) {
           throw new Error(format('%s'.red, error));
         }
         if (data.messages.length) {
+          // Log file scanning.
+          console.log('Scanning %s'.green, file);
           // Store result in _data variable.
           data.messages.forEach(function(object) {
             _data.push(object);
