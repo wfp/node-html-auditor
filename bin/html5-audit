@@ -56,7 +56,9 @@ try {
           });
           if (i === length) {
             // Create report.
-            report(_data, _report, 'html5-report.json');
+            report({
+              html5: _data
+            }, _report, 'html5-report.json');
           }
           i++;
         }
