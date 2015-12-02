@@ -61,7 +61,9 @@ try {
           throw new Error(format('%s'.red, error));
         }
         // Create report.
-        report(data, _report, 'a11y-report.json');
+        report({
+          a11y: data
+        }, _report, 'a11y-report.json');
       });
     }
     i++;

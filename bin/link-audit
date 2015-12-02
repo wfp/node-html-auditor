@@ -122,11 +122,12 @@ var check = function(file) {
         for (var i in data) {
           for (var j in data[i]) {
             data[i][j] = _.omit(data[i][j], 'filename');
-
           }
         }
         // Create report.
-        report(data, _report, 'links-report.json');
+        report({
+          link: data
+        }, _report, 'links-report.json');
         // Log.
         console.log('%d errors found.'.red, length);
       }
