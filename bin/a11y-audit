@@ -62,7 +62,7 @@ try {
         }
         // Create report.
         report({
-          a11y: data
+          assessibility: data
         }, _report, 'a11y-report.json');
       });
     }
