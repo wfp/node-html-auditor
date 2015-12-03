@@ -17,6 +17,7 @@ var fs = require('fs');
 var html5Lint = require('html5-lint');
 var colors = require('colors');
 var argv = require('yargs').argv;
+var _ = require('underscore');
 var report = require('../helpers/report');
 var files = require('../helpers/files');
 
@@ -50,14 +51,16 @@ try {
         if (data.messages.length) {
           // Log file scanning.
           console.log('Scanning %s'.green, file);
-          // Store result in _data variable.
           data.messages.forEach(function(object) {
+            // Add filename.
+            object.filename = file;
+            // Store result in _data variable.
             _data.push(object);
           });
           if (i === length) {
             // Create report.
             report({
-              html5: _data
+              html5: _.groupBy(_data, 'filename')
             }, _report, 'html5-report.json');
           }
           i++;
