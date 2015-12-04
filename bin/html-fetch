@@ -21,15 +21,18 @@ var request = require('request');
 var colors = require('colors');
 var argv = require('yargs').argv;
 
+var _map = {};
+
 try {
   // Get uri.
   var uri = argv.uri;
   // Get directory.
   var dir = argv.dir;
+  var map = argv.map;
   if (!uri || !dir) {
     throw new Error('Arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
   }
-  // Get directory stats.
+  // Get sitemaps directory stats.
   fs.lstat(dir, function(error, stats) {
     if (error) {
       throw new Error(format('%s'.red, error));
@@ -52,7 +55,24 @@ try {
         var XML = new XMLStream(_stream);
         XML.on('endElement: loc', function(item) {
           // Download HTML content.
-          download(item.$text, i);
+          download(item.$text, i, function() {
+            // Get map directory stats.
+            fs.lstat(map, function(error, stats) {
+              if (error) {
+                throw new Error(format('%s'.red, error));
+              }
+              if (stats.isDirectory()) {
+                // Create map.json file.
+                // Write - filename:url JSON object.
+                var stream = fs.createWriteStream(join(map, 'map.json'));
+                stream.write(JSON.stringify(_map));
+                stream.end();
+              }
+              else {
+                throw new Error(format('%s isn\'t directory'.red, map));
+              }
+            });
+          });
           i++;
         });
       }).on('error', function(error) {
@@ -60,7 +80,7 @@ try {
       }).end();
     }
     else {
-      throw new Error('Directory %s couldn\'t be found.'.red);
+      throw new Error(format('%s isn\'t directory'.red, dir));
     }
   });
 }
@@ -76,19 +96,22 @@ catch (e) {
  * @param {Number} key
  * @param {Function} callback
  */
-function download(url, key) {
+function download(url, key, callback) {
   // Create unique filename.
   var filename = format('sitemap-%d.html', key);
   // Get directory.
   var dirctory = dir.replace(/\/$/, '');
   // Create write stream.
   var stream = fs.createWriteStream(join(dirctory, filename));
+  // Store key:value of filename:url
+  _map[filename] = url;
   // Do HTTP call for each of the URL & get HTML content.
   // Write HTML content in file.
   request(url).on('data', function(data) {
     // Write stream.
     stream.write(data);
   }).on('end', function() {
+    callback(_map);
     // Stream - end.
     stream.end();
     // Log filename.
