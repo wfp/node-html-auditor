@@ -65,7 +65,7 @@ try {
                 // Create map.json file.
                 // Write - filename:url JSON object.
                 var stream = fs.createWriteStream(join(map, 'map.json'));
-                stream.write(JSON.stringify([_map]));
+                stream.write(JSON.stringify(_map));
                 stream.end();
               }
               else {
