@@ -23,20 +23,15 @@ var colors = require('colors');
  * @param {String} file
  */
 module.exports = function(data, report, file) {
-  // Cast filename.
-  file = file.toString();
-  // Check file extension (.json).
-  if (!file || !/[a-zA-Z]+(([\-_])?[0-9]+)?\.json/.test(file)) {
-    throw new Error(format('%s isn\'t json file.'.red, file));
-  }
-  // Cast report directory & remove slash.
-  report = report.toString().replace(/\/$/, '');
-  // Get report directory stats.
-  fs.lstat(report, function(error, stats) {
-    if (error) {
-      throw new Error(format('%s'.red, error));
-    }
-    if (stats.isDirectory()) {
+  data = JSON.stringify(data);
+  if (report && typeof report === 'string') {
+    // Get report directory stats.
+    fs.mkdir(report, function(error) {
+      if (error && error.code === 'EEXIST') {
+        console.log('%s exists'.green, report);
+      }
+      // Remove slash.
+      report = report.replace(/\/$/, '');
       // Stream - create file.
       var stream = fs.createWriteStream(join(report, file));
       // Stream - error event.
@@ -44,12 +39,16 @@ module.exports = function(data, report, file) {
         throw new Error(format('%s'.red, error));
       });
       // Stream - write.
-      stream.write(JSON.stringify(data));
+      stream.write(data);
       // Stream - finish event.
       stream.on('finish', function() {
         // Stream - end.
         stream.end();
       });
-    }
-  });
+    });
+  }
+  else {
+    // Log.
+    console.log(data);
+  }
 };

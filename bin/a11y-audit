@@ -27,13 +27,13 @@ try {
   // Get path to file.
   var path = argv.path;
   // Get report directory.
-  var _report = argv.report;
+  var _report = argv.report || '';
   // Get standard.
   var standard = argv.standard;
   // Get ignore.
   var ignore = argv.ignore || [];
-  if (!_report || !path || !standard) {
-    throw new Error('Arguments are missing a11y-audit --path [path/to/file(s)] --report [path/to/report] --standard [STANDARD]'.red);
+  if (!path || !standard) {
+    throw new Error('Mandatory arguments are missing a11y-audit --path [path/to/file(s)] --standard [STANDARD]'.red);
   }
   if (ignore && typeof ignore === 'string') {
     // Get ignore object.

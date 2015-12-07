@@ -27,11 +27,11 @@ try {
   // Get path to file.
   var path = argv.path;
   // Get report directory.
-  var _report = argv.report;
+  var _report = argv.report || '';
   // Get errors only.
   var errorsOnly = argv['errors-only'] || false;
-  if (!_report || !path) {
-    throw new Error('Arguments are missing html5-audit --path [path/to/file(s)] --report [path/to/report]'.red);
+  if (!path) {
+    throw new Error('Mandatory arguments are missing html5-audit --path [path/to/file(s)]'.red);
   }
   var i = 1;
   // Get file(s).

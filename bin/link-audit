@@ -33,8 +33,8 @@ try {
   var uri = argv['base-uri'];
   // Regex for uri.
   var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-  if (!path || !_report || !uri) {
-    throw new Error('Arguments are missing link-audit --path [path/to/file(s)] --report [path/to/report] --base-uri [URI]'.red);
+  if (!path || !uri) {
+    throw new Error('Mandatory arguments are missing link-audit --path [path/to/file(s)] --base-uri [URI]'.red);
   }
   if (!regex.test(uri)) {
     throw new Error(format('You entered incorrect base uri --base-uri=%s'.red, uri));

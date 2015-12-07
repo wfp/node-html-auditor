@@ -31,7 +31,7 @@ try {
   // Get map directory.
   var map = argv.map;
   if (!uri || !dir) {
-    throw new Error('Arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
+    throw new Error('Mandatory arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
   }
   // Create directory.
   fs.mkdir(dir, function(error) {
@@ -61,7 +61,7 @@ try {
             // Create directory.
             fs.mkdir(map, function(error) {
               if (error && error.code === 'EEXIST') {
-                console.log('%s exists'.green, dir);
+                console.log('%s exists'.green, map);
               }
               // Create map.json file.
               // Write - filename:url JSON object.
