@@ -46,7 +46,7 @@ try {
         errorsOnly: errorsOnly
       }, function(error, data) {
         if (error) {
-          throw new Error(format('%s'.red, error));
+          throw new Error(format(error).red);
         }
         if (data.messages.length) {
           // Log file scanning.
