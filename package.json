@@ -21,7 +21,7 @@
     "broken-link-checker": "^0.6.7",
     "colors": "^1.1.2",
     "html5-lint": "^0.2.5",
-    "pa11y": "^3.0.1",
+    "pa11y": "carbonrobot/pa11y#23526b2103dcf2f7b3dcdf23946303a129daee94",
     "phantomjs": "^1.9.19",
     "request": "^2.67.0",
     "underscore": "^1.8.3",
