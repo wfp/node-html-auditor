@@ -22,70 +22,57 @@ var colors = require('colors');
 var argv = require('yargs').argv;
 
 var _map = {};
-
-try {
-  // Get uri.
-  var uri = argv.uri;
-  // Get directory.
-  var dir = argv.dir;
-  // Get map directory.
-  var map = argv.map;
-  if (!uri || !dir) {
-    throw new Error('Mandatory arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
-  }
-  // Create directory.
-  fs.mkdir(dir, function(error) {
-    if (error && error.code === 'EEXIST') {
-      console.log('%s exists'.green, dir);
-    }
-    var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-    var data = '';
-    var i = 0;
-    // Check URI.
-    uri = uri && regex.test(uri) ? uri : (function() {
-      throw new Error(format('%s isn\'t valid uri, please provide correct --uri argument.'.red, uri));
-    })();
-    // Do HTTP call for sitemap XML URI.
-    request(uri).on('data', function(string) {
-      data += string;
-    }).on('end', function() {
-      var _stream = new stream.PassThrough();
-      // Store data.
-      _stream.end(data);
-      var XML = new XMLStream(_stream);
-      XML.on('endElement: loc', function(item) {
-        // Download HTML content.
-        download(item.$text, i, function() {
-          var data = JSON.stringify(_map);
-          if (map && typeof map === 'string') {
-            // Create directory.
-            fs.mkdir(map, function(error) {
-              if (error && error.code === 'EEXIST') {
-                console.log('%s exists'.green, map);
-              }
-              // Create map.json file.
-              // Write - filename:url JSON object.
-              var stream = fs.createWriteStream(join(map, 'map.json'));
-              stream.write(data);
-              stream.end();
-            });
-          }
-          else {
-            // Log data.
-            console.log(data);
-          }
-        });
-        i++;
-      });
-    }).on('error', function(error) {
-      throw new Error(format('%s'.red, error));
-    }).end();
-  });
+// Get uri.
+var uri = argv.uri;
+// Get directory.
+var dir = argv.dir;
+// Get map directory.
+var map = argv.map;
+if (!uri || !dir) {
+  throw new Error('Mandatory arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
 }
-catch (e) {
-  // Log exception.
-  console.log(e.message);
-};
+// Create directory.
+fs.mkdir(dir, function(error) {
+  var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+  var data = '';
+  var i = 0;
+  // Check URI.
+  uri = uri && regex.test(uri) ? uri : (function() {
+    throw new Error(format('%s isn\'t valid uri, please provide correct --uri argument.'.red, uri));
+  })();
+  // Do HTTP call for sitemap XML URI.
+  request(uri).on('data', function(string) {
+    data += string;
+  }).on('end', function() {
+    var _stream = new stream.PassThrough();
+    // Store data.
+    _stream.end(data);
+    var XML = new XMLStream(_stream);
+    XML.on('endElement: loc', function(item) {
+      // Download HTML content.
+      download(item.$text, i, function() {
+        var data = JSON.stringify(_map);
+        if (map && typeof map === 'string') {
+          // Create directory.
+          fs.mkdir(map, function(error) {
+            // Create map.json file.
+            // Write - filename:url JSON object.
+            var stream = fs.createWriteStream(join(map, 'map.json'));
+            stream.write(data);
+            stream.end();
+          });
+        }
+        else {
+          // Log data.
+          console.log(data);
+        }
+      });
+      i++;
+    });
+  }).on('error', function(error) {
+    throw new Error(format('%s'.red, error));
+  }).end();
+});
 
 /**
  * @callback download - Get HTML content & store in file.
