@@ -25,11 +25,8 @@ var colors = require('colors');
 module.exports = function(data, report, file) {
   data = JSON.stringify(data);
   if (report && typeof report === 'string') {
-    // Get report directory stats.
+    // Create directory.
     fs.mkdir(report, function(error) {
-      if (error && error.code === 'EEXIST') {
-        console.log('%s exists'.green, report);
-      }
       // Remove slash.
       report = report.replace(/\/$/, '');
       // Stream - create file.
