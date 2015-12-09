@@ -28,25 +28,34 @@ var path = argv.path;
 var _report = argv.report || '';
 // Get standard.
 var standard = argv.standard;
+// Get executable phantomjs path.
+var phantomjs = argv.phantomjs;
 // Get ignore.
 var ignore = argv.ignore || [];
 if (!path || !standard) {
   throw new Error('Mandatory arguments are missing a11y-audit --path [path/to/file(s)] --standard [STANDARD]'.red);
 }
-if (ignore && typeof ignore === 'string') {
-  // Get ignore object.
-  ignore = ignore.split(';');
-}
 // Prepare pa11y options.
 var options = {
   standard: standard,
-  ignore: ignore,
   log: {
     debug: console.log.bind(console),
     error: console.error.bind(console),
     info: console.info.bind(console)
   }
 };
+if (ignore && typeof ignore === 'string') {
+  // Get ignore object.
+  ignore = ignore.split(';');
+  // Add ignore option.
+  options['ignore'] = ignore;
+}
+if (phantomjs && typeof phantomjs === 'string') {
+  // Add phantomjs option.
+  options['phantom'] = {
+    path: phantomjs
+  }
+}
 var i = 1;
 // Instantiate pa11y.
 var _patty = pa11y(options);
