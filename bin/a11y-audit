@@ -21,6 +21,9 @@ var argv = require('yargs').argv;
 var report = require('../helpers/report');
 var files = require('../helpers/files');
 
+if (!process.env.PATH) {
+  throw new Error('Environment PATH not found.'.red);
+}
 var _data = {};
 // Get path to file.
 var path = argv.path;
