@@ -32,7 +32,8 @@ if (!uri || !dir) {
   throw new Error('Mandatory arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
 }
 // Create directory.
-fs.mkdir(dir, function(error) {
+process.umask(0);
+fs.mkdir(dir, '0777', function(error) {
   var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
   var data = '';
   var i = 0;
@@ -54,7 +55,7 @@ fs.mkdir(dir, function(error) {
         var data = JSON.stringify(_map);
         if (map && typeof map === 'string') {
           // Create directory.
-          fs.mkdir(map, function(error) {
+          fs.mkdir(map, '0777', function(error) {
             // Create map.json file.
             // Write - filename:url JSON object.
             var stream = fs.createWriteStream(join(map, 'map.json'));

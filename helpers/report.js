@@ -26,7 +26,8 @@ module.exports = function(data, report, file) {
   data = JSON.stringify(data);
   if (report && typeof report === 'string') {
     // Create directory.
-    fs.mkdir(report, function(error) {
+    process.umask(0);
+    fs.mkdir(report, '0777', function(error) {
       // Remove slash.
       report = report.replace(/\/$/, '');
       // Stream - create file.
