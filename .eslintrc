@@ -86,8 +86,8 @@ rules:
   no-undef: 2
 
   # Custom rules in tools/eslint-rules
-  require-buffer: 2
-  new-with-error: [2, "Error", "RangeError", "TypeError", "SyntaxError", "ReferenceError"]
+#  require-buffer: 2
+#  new-with-error: [2, "Error", "RangeError", "TypeError", "SyntaxError", "ReferenceError"]
 
 
 # Global scoped method and vars
