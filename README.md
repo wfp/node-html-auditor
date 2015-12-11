@@ -79,3 +79,12 @@ html5-audit --path ./html-pages --report ./report --errors-only
 ```
 link-audit --path ./html-pages --report ./report --base-uri http://example.com --report-verbose
 ```
+
+# Development
+
+## Code Standards
+
+```bash
+# Run code standard review
+npm run eslint
+```
