@@ -21,6 +21,24 @@ var request = require('request');
 var colors = require('colors');
 var argv = require('yargs').argv;
 
+process.on('uncaughtException', function (err) {
+  process.stdout.write(err.message.red + '\n');
+  process.exit(1);
+});
+
+var help = "html-fetch usage:\n" +
+  "\thtml-fetch [options]\n" +
+  "Options\n" +
+  "\t--help                     Display this error message\n" +
+  "\t--uri  [URI]  (required)   Path or URL to XML Sitemap file.\n" +
+  "\t--dir  [path] (required)   Directory to output HTML files.\n" +
+  "\t--map  [file] (optional)   File to output JSON that maps file names to URLs. If not set, sends to stdout\n";
+
+if (argv.help) {
+  process.stdout.write(help.yellow + '\n');
+  process.exit(0);
+}
+
 var _map = {};
 // Get uri.
 var uri = argv.uri;
@@ -29,7 +47,8 @@ var dir = argv.dir;
 // Get map directory.
 var map = argv.map;
 if (!uri || !dir) {
-  throw new Error('Mandatory arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
+  process.stdout.write(help.yellow + '\n');
+  process.exit(0);
 }
 // Create directory.
 process.umask(0);
