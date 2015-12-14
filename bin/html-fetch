@@ -12,14 +12,14 @@
 /**
  * Module dependencies.
  */
-var format = require('util').format;
-var stream = require('stream');
-var join = require('path').join;
-var fs = require('fs');
+var format    = require('util').format;
+var stream    = require('stream');
+var join      = require('path').join;
+var fs        = require('fs');
 var XMLStream = require('xml-stream');
-var request = require('request');
-var colors = require('colors');
-var argv = require('yargs').argv;
+var request   = require('request');
+var colors    = require('colors');
+var argv      = require('yargs').argv;
 
 var _map = {};
 // Get uri.
@@ -33,11 +33,11 @@ if (!uri || !dir) {
 }
 // Create directory.
 fs.mkdir(dir, function(error) {
-  var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-  var data = '';
-  var i = 0;
+  var regex      = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+  var data       = '';
+  var i          = 0;
   var indexCount = -1;
-  var log = '';
+  var log        = [];
 
 
   // Check URI.
@@ -54,7 +54,7 @@ fs.mkdir(dir, function(error) {
     var XML = new XMLStream(_stream);
     XML.on('endElement: loc', function(item) {
       // Download HTML content.
-      download(item.$text, i, function() {
+      download(item.$text, i, function(_map) {
         var data = JSON.stringify(_map);
         if (map && typeof map === 'string') {
           // Create directory.
@@ -67,12 +67,14 @@ fs.mkdir(dir, function(error) {
           });
           indexCount--;
         }
-        else {
+        else { 
           // Log data.
-          log += data;
+          log.push(_map);
           indexCount--;
-          if(indexCount == 0) {
-            console.log(log);
+          if (indexCount == 0) {
+            for (var i = 0, len = log.length; i < len; i++) {
+              console.log(JSON.stringify(log[i], null, ' '));
+            }
           }
         }
       });
