@@ -36,6 +36,10 @@ fs.mkdir(dir, function(error) {
   var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
   var data = '';
   var i = 0;
+  var indexCount = -1;
+  var log = '';
+
+
   // Check URI.
   uri = uri && regex.test(uri) ? uri : (function() {
     throw new Error(format('%s isn\'t valid uri, please provide correct --uri argument.'.red, uri));
@@ -61,13 +65,19 @@ fs.mkdir(dir, function(error) {
             stream.write(data);
             stream.end();
           });
+          indexCount--;
         }
         else {
           // Log data.
-          console.log(data);
+          log += data;
+          indexCount--;
+          if(indexCount == 0) {
+            console.log(log);
+          }
         }
       });
       i++;
+      indexCount = Math.max(indexCount, i);
     });
   }).on('error', function(error) {
     throw new Error(format('%s'.red, error));
@@ -96,11 +106,12 @@ function download(url, key, callback) {
     // Write stream.
     stream.write(data);
   }).on('end', function() {
-    callback(_map);
     // Stream - end.
     stream.end();
     // Log filename.
     console.log('%s has been added.', filename.green);
+
+    callback(_map);
   }).on('error', function(error) {
     // Stream - close.
     stream.close();
