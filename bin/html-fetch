@@ -21,23 +21,9 @@ var request = require('request');
 var colors = require('colors');
 var argv = require('yargs').argv;
 
-var log = argv.log;
-var writeLogStream = false;
-
-if (log) {
-  // Create log file using process id.
-  writeLogStream = fs.createWriteStream(join(log, process.pid.toString()));
-}
-
-process.on('uncaughtException', function(error) {
-  if (writeLogStream) {
-    writeLogStream.write(error.message.strip);
-    writeLogStream.close();
-  }
-  else {
-    process.stdout.write(error.message.red + '\n');
-  }
-
+process.on('uncaughtException', function (error) {
+  // Log errors.
+  process.stdout.write(error.message);
   process.exit(1);
 });
 
