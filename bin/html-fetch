@@ -14,12 +14,32 @@
  */
 var format = require('util').format;
 var stream = require('stream');
-var join = require('path').join;
+var path = require('path');
 var fs = require('fs');
 var XMLStream = require('xml-stream');
 var request = require('request');
 var colors = require('colors');
+var mkdirp = require('mkdirp');
 var argv = require('yargs').argv;
+
+process.on('uncaughtException', function (error) {
+  // Log errors.
+  process.stdout.write(error.message + '\n');
+  process.exit(1);
+});
+
+var help = "html-fetch usage:\n" +
+  "\thtml-fetch [options]\n" +
+  "Options\n" +
+  "\t--help                     Display this error message\n" +
+  "\t--uri  [URI]  (required)   Path or URL to XML Sitemap file.\n" +
+  "\t--dir  [path] (required)   Directory to output HTML files.\n" +
+  "\t--map  [file] (optional)   File to output JSON that maps file names to URLs. If not set, sends to stdout\n";
+
+if (argv.help) {
+  process.stdout.write(help.yellow + '\n');
+  process.exit(0);
+}
 
 var _map = {};
 // Get uri.
@@ -29,13 +49,21 @@ var dir = argv.dir;
 // Get map directory.
 var map = argv.map;
 if (!uri || !dir) {
-  throw new Error('Mandatory arguments are missing html-fetch --uri [URI] --dir [path/to/directory]'.red);
+  process.stdout.write(help.yellow + '\n');
+  process.exit(0);
 }
+
 // Create directory.
-fs.mkdir(dir, function(error) {
-  var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-  var data = '';
-  var i = 0;
+process.umask(0);
+mkdirp(path.normalize(dir), '0777', function(error) {
+  if (error) {
+    throw new Error(format('%s'.red, error));
+  }
+  var regex      = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+  var data       = '';
+  var i          = 0;
+  var j = -1;
+  var log        = [];
   // Check URI.
   uri = uri && regex.test(uri) ? uri : (function() {
     throw new Error(format('%s isn\'t valid uri, please provide correct --uri argument.'.red, uri));
@@ -50,24 +78,39 @@ fs.mkdir(dir, function(error) {
     var XML = new XMLStream(_stream);
     XML.on('endElement: loc', function(item) {
       // Download HTML content.
-      download(item.$text, i, function() {
+      download(item.$text, i, function(_map) {
         var data = JSON.stringify(_map);
         if (map && typeof map === 'string') {
+          // Get map directory path.
+          var dirname = path.dirname(path.normalize(map));
           // Create directory.
-          fs.mkdir(map, function(error) {
-            // Create map.json file.
+          process.umask(0)
+          mkdirp(dirname, '0777', function(error) {
+            if (error) {
+              throw new Error(format('%s'.red, error));
+            }
+            // Create [MAP].json file.
+            var mapJSON = path.join(dirname, path.basename(map) + '.json');
             // Write - filename:url JSON object.
-            var stream = fs.createWriteStream(join(map, 'map.json'));
+            var stream = fs.createWriteStream(mapJSON);
             stream.write(data);
             stream.end();
           });
+          j--;
         }
         else {
           // Log data.
-          console.log(data);
+          log.push(_map);
+          j--;
+          if (j == 0) {
+            for (var i = 0, length = log.length; i < length; i++) {
+              console.log(JSON.stringify(log[i], null, ' '));
+            }
+          }
         }
       });
       i++;
+      j = Math.max(j, i);
     });
   }).on('error', function(error) {
     throw new Error(format('%s'.red, error));
@@ -87,7 +130,7 @@ function download(url, key, callback) {
   // Get directory.
   var dirctory = dir.replace(/\/$/, '');
   // Create write stream.
-  var stream = fs.createWriteStream(join(dirctory, filename));
+  var stream = fs.createWriteStream(path.join(dirctory, filename));
   // Store key:value of filename:url
   _map[filename] = url;
   // Do HTTP call for each of the URL & get HTML content.
@@ -96,11 +139,12 @@ function download(url, key, callback) {
     // Write stream.
     stream.write(data);
   }).on('end', function() {
-    callback(_map);
     // Stream - end.
     stream.end();
     // Log filename.
     console.log('%s has been added.', filename.green);
+
+    callback(_map);
   }).on('error', function(error) {
     // Stream - close.
     stream.close();

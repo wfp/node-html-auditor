@@ -13,17 +13,38 @@
  * Module dependencies.
  */
 var format = require('util').format;
-var path = require('path');
+var path   = require('path');
 var colors = require('colors');
-var async = require('async');
-var pa11y = require('pa11y');
-var argv = require('yargs').argv;
+var async  = require('async');
+var pa11y  = require('pa11y');
+var argv   = require('yargs').argv;
 var report = require('../helpers/report');
-var files = require('../helpers/files');
+var files  = require('../helpers/files');
+
+process.on('uncaughtException', function(err) {
+  process.stdout.write(err.message.red + '\n');
+  process.exit(1);
+});
 
 if (!process.env.PATH) {
   throw new Error('Environment PATH not found.'.red);
 }
+
+var help = "a11y-audit usage:\n" +
+  "\ta11y-audit [options]\n" +
+  "Options\n" +
+  "\t--help                                        Display this error message\n" +
+  "\t--path      [path / file] (required)          Path to HTML files or an HTML file to audit\n" +
+  "\t--standard  [standard] (default: WCAG2AA)     Accessibility standard as per https://github.com/nature/pa11y#standard-string\n" +
+  "\t--report    [path]                            Path to output JSON audit report\n" +
+  "\t--ignore    [types]                           Types to ignore separated by semi-colons (notice,warning)\n" +
+  "\t--phantomjs [path]                            Define the path to the phantomjs binary.\n";
+
+if (argv.help) {
+  process.stdout.write(help.yellow + '\n');
+  process.exit(0);
+}
+
 var _data = {};
 // Get path to file.
 var path = argv.path;
@@ -36,15 +57,16 @@ var phantomjs = argv.phantomjs;
 // Get ignore.
 var ignore = argv.ignore || [];
 if (!path || !standard) {
-  throw new Error('Mandatory arguments are missing a11y-audit --path [path/to/file(s)] --standard [STANDARD]'.red);
+  process.stdout.write(help.yellow + '\n');
+  process.exit(0);
 }
 // Prepare pa11y options.
 var options = {
   standard: standard,
-  log: {
+  log:      {
     debug: console.log.bind(console),
     error: console.error.bind(console),
-    info: console.info.bind(console)
+    info:  console.info.bind(console)
   }
 };
 if (ignore && typeof ignore === 'string') {
