@@ -30,7 +30,6 @@ if (!process.env.PATH) {
   throw new Error('Environment PATH not found.'.red);
 }
 
-
 var help = "a11y-audit usage:\n" +
   "\ta11y-audit [options]\n" +
   "Options\n" +
@@ -45,7 +44,6 @@ if (argv.help) {
   process.stdout.write(help.yellow + '\n');
   process.exit(0);
 }
-
 
 var _data = {};
 // Get path to file.
