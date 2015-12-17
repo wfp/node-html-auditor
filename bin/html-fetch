@@ -12,14 +12,14 @@
 /**
  * Module dependencies.
  */
-var format = require('util').format;
-var stream = require('stream');
-var join = require('path').join;
-var fs = require('fs');
+var format    = require('util').format;
+var stream    = require('stream');
+var join      = require('path').join;
+var fs        = require('fs');
 var XMLStream = require('xml-stream');
-var request = require('request');
-var colors = require('colors');
-var argv = require('yargs').argv;
+var request   = require('request');
+var colors    = require('colors');
+var argv      = require('yargs').argv;
 
 process.on('uncaughtException', function (error) {
   // Log errors.
@@ -51,12 +51,14 @@ if (!uri || !dir) {
   process.stdout.write(help.yellow + '\n');
   process.exit(0);
 }
-// Create directory.
+
 process.umask(0);
-fs.mkdir(dir, '0777', function(error) {
-  var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-  var data = '';
-  var i = 0;
+fs.mkdir(dir, function(error) {
+  var regex      = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+  var data       = '';
+  var i          = 0;
+  var j = -1;
+  var log        = [];
   // Check URI.
   uri = uri && regex.test(uri) ? uri : (function() {
     throw new Error(format('%s isn\'t valid uri, please provide correct --uri argument.'.red, uri));
@@ -71,7 +73,7 @@ fs.mkdir(dir, '0777', function(error) {
     var XML = new XMLStream(_stream);
     XML.on('endElement: loc', function(item) {
       // Download HTML content.
-      download(item.$text, i, function() {
+      download(item.$text, i, function(_map) {
         var data = JSON.stringify(_map);
         if (map && typeof map === 'string') {
           // Create directory.
@@ -82,13 +84,21 @@ fs.mkdir(dir, '0777', function(error) {
             stream.write(data);
             stream.end();
           });
+          j--;
         }
         else {
           // Log data.
-          console.log(data);
+          log.push(_map);
+          j--;
+          if (j == 0) {
+            for (var i = 0, length = log.length; i < length; i++) {
+              console.log(JSON.stringify(log[i], null, ' '));
+            }
+          }
         }
       });
       i++;
+      j = Math.max(j, i);
     });
   }).on('error', function(error) {
     throw new Error(format('%s'.red, error));
@@ -117,11 +127,12 @@ function download(url, key, callback) {
     // Write stream.
     stream.write(data);
   }).on('end', function() {
-    callback(_map);
     // Stream - end.
     stream.end();
     // Log filename.
     console.log('%s has been added.', filename.green);
+
+    callback(_map);
   }).on('error', function(error) {
     // Stream - close.
     stream.close();
