@@ -12,18 +12,19 @@
 /**
  * Module dependencies.
  */
-var format    = require('util').format;
-var stream    = require('stream');
-var join      = require('path').join;
-var fs        = require('fs');
+var format = require('util').format;
+var stream = require('stream');
+var path = require('path');
+var fs = require('fs');
 var XMLStream = require('xml-stream');
-var request   = require('request');
-var colors    = require('colors');
-var argv      = require('yargs').argv;
+var request = require('request');
+var colors = require('colors');
+var mkdirp = require('mkdirp');
+var argv = require('yargs').argv;
 
 process.on('uncaughtException', function (error) {
   // Log errors.
-  process.stdout.write(error.message);
+  process.stdout.write(error.message + '\n');
   process.exit(1);
 });
 
@@ -52,8 +53,12 @@ if (!uri || !dir) {
   process.exit(0);
 }
 
+// Create directory.
 process.umask(0);
-fs.mkdir(dir, function(error) {
+mkdirp(path.normalize(dir), '0777', function(error) {
+  if (error) {
+    throw new Error(format('%s'.red, error));
+  }
   var regex      = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
   var data       = '';
   var i          = 0;
@@ -76,11 +81,18 @@ fs.mkdir(dir, function(error) {
       download(item.$text, i, function(_map) {
         var data = JSON.stringify(_map);
         if (map && typeof map === 'string') {
+          // Get map directory path.
+          var dirname = path.dirname(path.normalize(map));
           // Create directory.
-          fs.mkdir(map, '0777', function(error) {
-            // Create map.json file.
+          process.umask(0)
+          mkdirp(dirname, '0777', function(error) {
+            if (error) {
+              throw new Error(format('%s'.red, error));
+            }
+            // Create [MAP].json file.
+            var mapJSON = path.join(dirname, path.basename(map) + '.json');
             // Write - filename:url JSON object.
-            var stream = fs.createWriteStream(join(map, 'map.json'));
+            var stream = fs.createWriteStream(mapJSON);
             stream.write(data);
             stream.end();
           });
@@ -118,7 +130,7 @@ function download(url, key, callback) {
   // Get directory.
   var dirctory = dir.replace(/\/$/, '');
   // Create write stream.
-  var stream = fs.createWriteStream(join(dirctory, filename));
+  var stream = fs.createWriteStream(path.join(dirctory, filename));
   // Store key:value of filename:url
   _map[filename] = url;
   // Do HTTP call for each of the URL & get HTML content.
