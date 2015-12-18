@@ -21,8 +21,8 @@ var argv   = require('yargs').argv;
 var report = require('../helpers/report');
 var files  = require('../helpers/files');
 
-process.on('uncaughtException', function(err) {
-  process.stdout.write(err.message.red + '\n');
+process.on('uncaughtException', function(error) {
+  process.stdout.write(error.message.red + '\n');
   process.exit(1);
 });
 
@@ -41,9 +41,10 @@ var help = 'a11y-audit usage:\n' +
   'per https://github.com/nature/pa11y#standard-string\n' +
   '\t--report    [path]                            Path to output JSON audit' +
   'report\n' +
-  '\t--ignore    [types] Types to ignore separated by semi-colons' +
-  '(notice,warning)\n' +
-  '\t--phantomjs [path] Define the path to the phantomjs binary.\n';
+  '\t--ignore                                      [types] Types to ignore' +
+  'separated by semi-colons (notice,warning)\n' +
+  '\t--phantomjs                                   [path] Define the path to' +
+  'the phantomjs binary.\n';
 
 if (argv.help) {
   process.stdout.write(help.yellow + '\n');

@@ -34,7 +34,7 @@ var help = 'html-fetch usage:\n' +
   '\t--help                     Display this error message\n' +
   '\t--uri  [URI]  (required)   Path or URL to XML Sitemap file.\n' +
   '\t--dir  [path] (required)   Directory to output HTML files.\n' +
-  '\t--map  [file] (optional)   File to output JSON that maps file names to' +
+  '\t--map  [file] (optional)   File to output JSON that maps file names to ' +
   'URLs. If not set, sends to stdout\n';
 
 if (argv.help) {
