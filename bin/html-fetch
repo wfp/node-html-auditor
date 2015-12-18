@@ -89,8 +89,10 @@ mkdirp(path.normalize(dir), '0777', function(error) {
             if (error) {
               throw new Error(format('%s'.red, error));
             }
+            // Get map basename.
+            var basename = path.basename(map).split('.');
             // Create [MAP].json file.
-            var mapJSON = path.join(dirname, path.basename(map) + '.json');
+            var mapJSON = path.join(dirname, basename[0] + '.json');
             // Write - filename:url JSON object.
             var stream = fs.createWriteStream(mapJSON);
             stream.write(data);
@@ -143,7 +145,6 @@ function download(url, key, callback) {
     stream.end();
     // Log filename.
     console.log('%s has been added.', filename.green);
-
     callback(_map);
   }).on('error', function(error) {
     // Stream - close.
