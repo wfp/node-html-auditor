@@ -37,7 +37,7 @@ module.exports = function(file, files, callback) {
         file = file.replace(/\/$/, '');
         // Case path is directory.
         // Get all files from directory.
-        // Passing files array to the callback e.g - [path/to/file.html, path/to/file-1.html].
+        // Passing files array to the callback e.g - [path/to/file.html ..]
         if (stats.isDirectory()) {
           // Read directory & get all files from directory.
           fs.readdir(file, function(error, _files) {
@@ -59,7 +59,7 @@ module.exports = function(file, files, callback) {
     }
   })(function(files) {
     var i = files.length;
-    while(i--) {
+    while (i--) {
       var file = files[i];
       if (!/[a-zA-Z]+(([\-_])?[0-9]+)?\.html$/.test(file)) {
         // Remove non-.html file from files.
