@@ -22,19 +22,20 @@ var colors = require('colors');
 var mkdirp = require('mkdirp');
 var argv = require('yargs').argv;
 
-process.on('uncaughtException', function (error) {
+process.on('uncaughtException', function(error) {
   // Log errors.
   process.stdout.write(error.message + '\n');
   process.exit(1);
 });
 
-var help = "html-fetch usage:\n" +
-  "\thtml-fetch [options]\n" +
-  "Options\n" +
-  "\t--help                     Display this error message\n" +
-  "\t--uri  [URI]  (required)   Path or URL to XML Sitemap file.\n" +
-  "\t--dir  [path] (required)   Directory to output HTML files.\n" +
-  "\t--map  [file] (optional)   File to output JSON that maps file names to URLs. If not set, sends to stdout\n";
+var help = 'html-fetch usage:\n' +
+  '\thtml-fetch [options]\n' +
+  'Options\n' +
+  '\t--help                     Display this error message\n' +
+  '\t--uri  [URI]  (required)   Path or URL to XML Sitemap file.\n' +
+  '\t--dir  [path] (required)   Directory to output HTML files.\n' +
+  '\t--map  [file] (optional)   File to output JSON that maps file names to ' +
+  'URLs. If not set, sends to stdout\n';
 
 if (argv.help) {
   process.stdout.write(help.yellow + '\n');
@@ -59,14 +60,15 @@ mkdirp(path.normalize(dir), '0777', function(error) {
   if (error) {
     throw new Error(format('%s'.red, error));
   }
-  var regex      = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-  var data       = '';
-  var i          = 0;
+  var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+  var data = '';
+  var i = 0;
   var j = -1;
-  var log        = [];
+  var log = [];
   // Check URI.
   uri = uri && regex.test(uri) ? uri : (function() {
-    throw new Error(format('%s isn\'t valid uri, please provide correct --uri argument.'.red, uri));
+    var message = '%s isn\'t valid uri, please provide correct --uri argument.';
+    throw new Error(format(message.red, uri));
   })();
   // Do HTTP call for sitemap XML URI.
   request(uri).on('data', function(string) {
@@ -84,13 +86,15 @@ mkdirp(path.normalize(dir), '0777', function(error) {
           // Get map directory path.
           var dirname = path.dirname(path.normalize(map));
           // Create directory.
-          process.umask(0)
+          process.umask(0);
           mkdirp(dirname, '0777', function(error) {
             if (error) {
               throw new Error(format('%s'.red, error));
             }
+            // Get map basename.
+            var basename = path.basename(map).split('.');
             // Create [MAP].json file.
-            var mapJSON = path.join(dirname, path.basename(map) + '.json');
+            var mapJSON = path.join(dirname, basename[0] + '.json');
             // Write - filename:url JSON object.
             var stream = fs.createWriteStream(mapJSON);
             stream.write(data);
@@ -143,7 +147,6 @@ function download(url, key, callback) {
     stream.end();
     // Log filename.
     console.log('%s has been added.', filename.green);
-
     callback(_map);
   }).on('error', function(error) {
     // Stream - close.

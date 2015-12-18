@@ -30,8 +30,10 @@
     "yargs": "^3.29.0"
   },
   "devDependencies": {
-    "jscs": "^2.5.1",
-    "jshint": "^2.8.0"
+    "eslint": "1.10.3"
   },
-  "license": "BSD-3-Clause"
+  "license": "BSD-3-Clause",
+  "scripts": {
+    "eslint": "node_modules/.bin/eslint --config=.eslintrc bin/* helpers/*"
+  }
 }
