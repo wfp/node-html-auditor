@@ -41,7 +41,7 @@ var help = 'a11y-audit usage:\n' +
   'per https://github.com/nature/pa11y#standard-string\n' +
   '\t--report    [path]                            Path to output JSON audit' +
   'report\n' +
-  '\t--ignore                                      [types] Types to ignore' +
+  '\t--ignore    [types]                           Types to ignore ' +
   'separated by semi-colons (notice,warning)\n' +
   '\t--phantomjs                                   [path] Define the path to' +
   'the phantomjs binary.\n';
@@ -53,16 +53,16 @@ if (argv.help) {
 
 var _data = {};
 // Get path to file.
-var path = argv.path;
+var _path = argv.path;
 // Get report directory.
 var _report = argv.report || '';
 // Get standard.
-var standard = argv.standard;
+var standard = argv.standard || 'WCAG2AA';
 // Get executable phantomjs path.
 var phantomjs = argv.phantomjs;
 // Get ignore.
 var ignore = argv.ignore || [];
-if (!path || !standard) {
+if (!_path) {
   process.stdout.write(help.yellow + '\n');
   process.exit(0);
 }
@@ -91,9 +91,10 @@ var i = 1;
 // Instantiate pa11y.
 var _patty = pa11y(options);
 // Get file(s).
-files(path, argv._, function(file, length) {
+files(_path, argv._, function(file, length) {
   // Prepare _data object.
-  _data[file] = _patty.run.bind(_patty, format('file://%s', file));
+  _data[file] = _patty.run.bind(_patty,
+    format('file://%s', path.resolve(file)));
   if (i === length) {
     // Test file(s).
     async.series(_data, function(error, data) {
