@@ -3,12 +3,7 @@ A NodeJS CLI tool to fetch and audit HTML pages for [web accessibility](https://
 # Installation
 
 ```
-git clone https://github.com/wfp/node-html-auditor.git
-cd node-html-auditor
-git checkout develop
-
-npm install
-npm link
+npm install -g html-auditor
 ```
 
 # Retreive HTML

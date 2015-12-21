@@ -1,5 +1,5 @@
 {
-  "name": "node-html-auditor",
+  "name": "html-auditor",
   "version": "0.8.0",
   "description": "Accessibility (a11y), HTML5 and link auditor for NodeJS",
   "repository": {
