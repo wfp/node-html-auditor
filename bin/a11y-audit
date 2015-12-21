@@ -41,7 +41,7 @@ var help = 'a11y-audit usage:\n' +
   'per https://github.com/nature/pa11y#standard-string\n' +
   '\t--report    [path]                            Path to output JSON audit' +
   'report\n' +
-  '\t--ignore    [types]                           Types to ignore' +
+  '\t--ignore    [types]                           Types to ignore ' +
   'separated by semi-colons (notice,warning)\n' +
   '\t--phantomjs                                   [path] Define the path to' +
   'the phantomjs binary.\n';
