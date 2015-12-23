@@ -50,13 +50,18 @@ var path = argv.path;
 var _report = argv.report || '';
 // Get errors only.
 var errorsOnly = argv['errors-only'] || false;
-if (!path) {
+// Get JSON map path.
+var map = argv.map;
+// Get modified boolean.
+var modified = argv.lastmod || false;
+if (!path || (modified && !map)) {
   process.stdout.write(help.yellow + '\n');
   process.exit(0);
 }
+
 var i = 1;
 // Get file(s).
-files(path, argv._, function(file, length) {
+files(path, argv._, map, modified, function(file, length) {
   // Get content.
   fs.readFile(file, 'utf-8', function(error, content) {
     if (error) {

@@ -62,10 +62,20 @@ var standard = argv.standard || 'WCAG2AA';
 var phantomjs = argv.phantomjs;
 // Get ignore.
 var ignore = argv.ignore || [];
+// Get JSON map path.
+var map = '' + argv.map;
+// Get modified boolean.
+var modified = argv.lastmod || false;
+
 if (!_path) {
   process.stdout.write(help.yellow + '\n');
   process.exit(0);
 }
+
+if (modified && !map) {
+  throw new Error('--map argument is required');
+}
+
 // Prepare pa11y options.
 var options = {
   standard: standard,
@@ -91,7 +101,7 @@ var i = 1;
 // Instantiate pa11y.
 var _patty = pa11y(options);
 // Get file(s).
-files(_path, argv._, function(file, length) {
+files(_path, argv._, map, modified, function(file, length) {
   // Prepare _data object.
   _data[file] = _patty.run.bind(_patty,
     format('file://%s', path.resolve(file)));
