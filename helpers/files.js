@@ -2,7 +2,7 @@
  * @file files.js
  * @author Lasha Badashvili (lashab@picktek.com)
  *
- * Get HTML file(s) from directory.
+ * Get HTML file(s) path to scan.
  */
 
 'use strict';
@@ -25,6 +25,7 @@ var colors = require('colors');
 module.exports = function(file, files, map, modified, callback) {
   (function(_callback) {
     if (modified) {
+      // Get modified files.
       fs.readFile(map, 'utf-8', function(error, data) {
         if (error) {
           throw new Error(error);

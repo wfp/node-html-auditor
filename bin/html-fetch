@@ -32,16 +32,17 @@ process.on('uncaughtException', function(error) {
 var help = 'html-fetch usage:\n' +
   '\thtml-fetch [options]\n' +
   'Options\n' +
-  '\t--help                     Display this error message\n' +
-  '\t--uri  [URI]  (required)   Path or URL to XML Sitemap file.\n' +
-  '\t--dir  [path] (required)   Directory to output HTML files.\n' +
-  '\t--map  [file] (optional)   File to output JSON that maps file names to ' +
-  'URLs. If not set, sends to stdout\n';
-
-if (argv.help) {
-  process.stdout.write(help.yellow + '\n');
-  process.exit(0);
-}
+  '\t--help                                                   ' +
+  'Display this error message.\n' +
+  '\t--uri      [URI]  (required)                             ' +
+  'Path or URL to XML Sitemap file.\n' +
+  '\t--dir      [path] (required)                             ' +
+  'Directory to output HTML files.\n' +
+  '\t--map      [file] (required when --lastmod is provided)  ' +
+  'File to output JSON that maps file names to URLs. If not set, sends to ' +
+  'stdout. \n' +
+  '\t--lastmod  [date]                                        ' +
+  'Date for downloading last modified content.';
 
 // Get uri.
 var uri = argv.uri;
@@ -50,24 +51,21 @@ var dir = argv.dir;
 // Get map directory.
 var map = argv.map;
 // Get last modified date.
-var modified = argv.lastmod;
-if (!uri || !dir) {
+var modified = argv.lastmod || '';
+
+if (argv.help || (!uri || !dir) || (modified && !map)) {
   process.stdout.write(help.yellow + '\n');
   process.exit(0);
 }
 
-if (modified && !map) {
-  throw new Error('--map argument is missing');
-}
+process.umask(0);
 
 dir = path.normalize(dir);
 // Create directory.
-process.umask(0);
 mkdirp(dir, '0777', function(error) {
   if (error) {
     throw new Error(error);
   }
-
   var data = '';
   var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
   // Check URI.
@@ -96,7 +94,6 @@ mkdirp(dir, '0777', function(error) {
         XML.pause();
         throw new Error('<lastmod> element not found');
       }
-
       var _uri = '';
       if (_.has(item, 'loc')) {
         // Get location (uri).
@@ -130,6 +127,7 @@ mkdirp(dir, '0777', function(error) {
       if (_uri) {
         // Download HTML content.
         download(_uri, i, function(directory, filename) {
+          // Create filename:url key value object.
           _map.uris[filename] = _uri;
           if (map && _.isString(map)) {
             // Get map directory path.
@@ -139,7 +137,6 @@ mkdirp(dir, '0777', function(error) {
               if (error) {
                 throw new Error(error);
               }
-
               // Get map basename.
               var basename = path.basename(map).split('.');
               // Create [MAP].json file.
@@ -151,9 +148,8 @@ mkdirp(dir, '0777', function(error) {
                     _map.uris = _.extend(_map.uris, JSON.parse(data).uris);
                   }
                 }
-
-                // Write - Filename:Url object.
-                // Write - Last modified files path object.
+                // Write - filename:url object.
+                // Write - last modified file paths object.
                 var stream = fs.createWriteStream(mapJSON);
                 stream.write(JSON.stringify(_map));
                 stream.end();
