@@ -2,7 +2,7 @@
  * @file files.js
  * @author Lasha Badashvili (lashab@picktek.com)
  *
- * Get HTML file(s) from directory.
+ * Get HTML file(s) path to scan.
  */
 
 'use strict';
@@ -22,40 +22,51 @@ var colors = require('colors');
  * @param {Object} files
  * @param {Function} callback
  */
-module.exports = function(file, files, callback) {
+module.exports = function(file, files, map, modified, callback) {
   (function(_callback) {
-    files.push(file);
-    for (var i in files) {
-      // Get file.
-      file = files[i];
-      // Get file stats.
-      fs.lstat(file, function(error, stats) {
+    if (modified) {
+      // Get modified files.
+      fs.readFile(map, 'utf-8', function(error, data) {
         if (error) {
-          throw new Error(format('%s'.red, error));
+          throw new Error(error);
         }
-        // Remove slash.
-        file = file.replace(/\/$/, '');
-        // Case path is directory.
-        // Get all files from directory.
-        // Passing files array to the callback e.g - [path/to/file.html ..]
-        if (stats.isDirectory()) {
-          // Read directory & get all files from directory.
-          fs.readdir(file, function(error, _files) {
-            if (error) {
-              throw new Error(format('%s'.red, error));
-            }
-            // Update files path.
-            _files.forEach(function(_file, key, _files) {
-              _files[key] = join(file, _file);
-            });
-            _callback(_files);
-          });
-        }
-        else {
-          _callback(files);
-        }
+        _callback(JSON.parse(data).modified);
       });
-      break;
+    }
+    else {
+      files.push(file);
+      for (var i in files) {
+        // Get file.
+        file = files[i];
+        // Get file stats.
+        fs.lstat(file, function(error, stats) {
+          if (error) {
+            throw new Error(error);
+          }
+          // Remove slash.
+          file = file.replace(/\/$/, '');
+          // Case path is directory.
+          // Get all files from directory.
+          // Passing files array to the callback e.g - [path/to/file.html ..]
+          if (stats.isDirectory()) {
+            // Read directory & get all files from directory.
+            fs.readdir(file, function(error, _files) {
+              if (error) {
+                throw new Error(error);
+              }
+              // Update files path.
+              _files.forEach(function(_file, key, _files) {
+                _files[key] = join(file, _file);
+              });
+              _callback(_files);
+            });
+          }
+          else {
+            _callback(files);
+          }
+        });
+        break;
+      }
     }
   })(function(files) {
     var i = files.length;
