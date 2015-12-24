@@ -14,11 +14,11 @@ npm install -g html-auditor
 
 ### Options
 
-- `--help` _(optional)_ - Display help text.
-- `--uri` _(required)_ - path or URL to XML Sitemap file.
-- `--dir` _(required)_ - directory to output HTML files.
+- `--help` _(optional)_ - Display help text
+- `--uri` _(required)_ - path or URL to XML Sitemap file
+- `--dir` _(required)_ - directory to output HTML files
 - `--map` _(required when --lastmod is provided)_ - file to output JSON that maps file names to URLs. If not set, sends to stdout
-- `--lastmod` _(optional)_ - Date for downloading last modified content.
+- `--lastmod` _(optional)_ - Date for downloading last modified content
 
 ### Example
 
@@ -41,7 +41,7 @@ html-fetch --uri http://www.bbc.com/sport/sitemap.xml --dir ./html-pages
 - `--ignore [types]` - types to ignore separated by semi-colons (`notice;warning`)
 - `--phantomjs [path]` - define the path to the phantomjs binary
 - `--map` _(required when --lastmod is provided)_ - file to output JSON that maps file names to URLs. If not set, sends to stdout
-- `--lastmod` _(optional)_ - Date for downloading last modified content
+- `--lastmod` _(optional)_ - Scan last modified files
 
 ### Example
 
@@ -60,7 +60,7 @@ a11y-audit --path ./html-pages --report ./report --standard WCAG2AA --ignore 'no
 - `--report [path]` - path to output JSON audit report
 - `--errors-only` - only report errors (no notices or warnings)
 - `--map` _(required when --lastmod is provided)_ - file to output JSON that maps file names to URLs. If not set, sends to stdout
-- `--lastmod` _(optional)_ - Date for downloading last modified content
+- `--lastmod` _(optional)_ - Scan last modified files
 
 ### Example
 
@@ -80,7 +80,7 @@ html5-audit --path ./html-pages --report ./report --errors-only
 - `--report [path]` - path to output JSON audit report
 - `--report-verbose` - verbose report
 - `--map` _(required when --lastmod is provided)_ - file to output JSON that maps file names to URLs. If not set, sends to stdout
-- `--lastmod` _(optional)_ - Date for downloading last modified content.
+- `--lastmod` _(optional)_ - Scan last modified files
 
 ### Example
 
