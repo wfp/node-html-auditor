@@ -10,7 +10,6 @@
 /**
  * Module dependencies.
  */
-var format = require('util').format;
 var url = require('url');
 var fs = require('fs');
 var colors = require('colors');
@@ -63,8 +62,8 @@ module.exports = function(argv) {
   // Regex for uri.
   var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
   if (!regex.test(uri)) {
-    var message = 'You entered incorrect base uri --base-uri=%s';
-    throw new Error(format(message, uri));
+    var message = 'You entered incorrect base uri --base-uri=';
+    throw new Error(message + uri);
   }
 
   // Get file(s).
@@ -101,7 +100,7 @@ module.exports = function(argv) {
         // Get links which has internal & redirected property true.
         // Set proper error message.
         if (result.error) {
-          error = result.error;
+          error = result.error.toString();
         }
         else if (result.http.statusCode === 404) {
           error = 'Link page not found';
@@ -134,7 +133,7 @@ module.exports = function(argv) {
         }
         else {
           // Log.
-          console.log('%s passed scan test successfuly.'.green, url.original);
+          console.log('%s passed scan test successfuly'.green, url.original);
         }
       },
       complete: function() {
@@ -154,11 +153,11 @@ module.exports = function(argv) {
             link: data
           }, _report, 'links-report.json');
           // Log.
-          console.log('%d errors found.'.red, length);
+          console.log('%d errors found'.red, length);
         }
         else {
           // Log.
-          console.log('Congrats! 0 errors found.'.green);
+          console.log('Congrats! 0 errors found'.green);
         }
       }
     });

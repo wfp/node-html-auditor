@@ -192,7 +192,7 @@ module.exports = function(argv) {
       stream.write(data);
     }).on('end', function() {
       // Log filename.
-      console.log('%s has been added.', filename.green);
+      console.log('%s has been added', filename.green);
       // Stream - end.
       stream.end();
       // Passing _map object to the callback.

@@ -10,7 +10,6 @@
 /**
  * Module dependencies.
  */
-var format = require('util').format;
 var path   = require('path');
 var colors = require('colors');
 var async  = require('async');
@@ -98,8 +97,7 @@ module.exports = function(argv) {
   // Get file(s).
   files(_path, argv._, map, modified, function(file, length) {
     // Prepare _data object.
-    _data[file] = _patty.run.bind(_patty,
-      format('file://%s', path.resolve(file)));
+    _data[file] = _patty.run.bind(_patty, 'file://' + path.resolve(file));
     if (i === length) {
       // Test file(s).
       async.series(_data, function(error, data) {

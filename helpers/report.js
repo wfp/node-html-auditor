@@ -12,7 +12,6 @@
  */
 var path = require('path');
 var fs = require('fs');
-var format = require('util').format;
 var colors = require('colors');
 var mkdirp = require('mkdirp');
 
@@ -31,7 +30,7 @@ module.exports = function(data, report, file) {
     process.umask(0);
     mkdirp(report, '0777', function(error) {
       if (error) {
-        throw new Error(format('%s'.red, error));
+        throw new Error(error);
       }
       // Remove slash.
       report = report.replace(/\/$/, '');
@@ -39,7 +38,7 @@ module.exports = function(data, report, file) {
       var stream = fs.createWriteStream(path.join(report, file));
       // Stream - error event.
       stream.on('error', function(error) {
-        throw new Error(format('%s'.red, error));
+        throw new Error(error);
       });
       // Stream - write.
       stream.write(data);

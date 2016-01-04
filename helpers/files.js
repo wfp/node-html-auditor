@@ -10,7 +10,6 @@
 /**
  * Module dependencies.
  */
-var format = require('util').format;
 var join = require('path').join;
 var fs = require('fs');
 var colors = require('colors');
@@ -77,7 +76,7 @@ module.exports = function(file, files, map, modified, callback) {
         // Remove non-.html file from files.
         files.splice(files.indexOf(file), 1);
         // Skip & log non-.html files.
-        console.log(format('Skip %s file.'.red, file));
+        console.log('Skip %s file'.yellow, file);
       }
     }
     files.forEach(function(file) {
