@@ -23,7 +23,7 @@ npm install -g html-auditor
 ### Example
 
 ```
-html-fetch --uri http://www.bbc.com/sport/sitemap.xml --dir ./html-pages
+html-fetch --uri https://www.washingtonpost.com/web-national-sitemap.xml --dir ./html-pages
 ```
 
 # Audit HTML
