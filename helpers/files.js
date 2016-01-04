@@ -34,6 +34,7 @@ module.exports = function(file, files, map, modified, callback) {
       });
     }
     else {
+      files.shift();
       files.push(file);
       for (var i in files) {
         // Get file.

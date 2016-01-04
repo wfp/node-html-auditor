@@ -1,0 +1,38 @@
+#! /usr/bin/env node
+
+/**
+ * @file html-audit
+ * @author Lasha Badashvili (lashab@picktek.com)
+ *
+ * Running HTML auditor tools.
+ */
+
+'use strict';
+
+/**
+ * Module dependencies.
+ */
+var argv = require('yargs').argv;
+var _ = require('underscore');
+
+var commands = {
+  fetch: require('../modules/html-fetch'),
+  a11y: require('../modules/a11y-audit'),
+  html5: require('../modules/html5-audit'),
+  link: require('../modules/link-audit')
+};
+
+process.on('uncaughtException', function(error) {
+  // Log errors.
+  process.stdout.write(error.message.red + '\n');
+  process.exit(1);
+});
+
+var command = argv._[0];
+
+if (!_.has(commands, command)) {
+  throw new Error(command + ' command not found');
+}
+
+// Run command.
+commands[command](argv);
