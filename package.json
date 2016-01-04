@@ -25,10 +25,6 @@
     }
   ],
   "bin": {
-    "a11y-audit": "./bin/a11y-audit",
-    "html5-audit": "./bin/html5-audit",
-    "html-fetch": "./bin/html-fetch",
-    "link-audit": "./bin/link-audit",
     "html-audit": "./bin/html-audit"
   },
   "engines": {
