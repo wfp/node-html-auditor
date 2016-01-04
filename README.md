@@ -10,7 +10,7 @@ npm install -g html-auditor
 
 ## HTML Fetch
 
-`html-fetch`: fetch HTML pages from an [XML sitemap](https://en.wikipedia.org/wiki/Sitemaps) or individual HTML page.
+`html-audit fetch`: fetch HTML pages from an [XML sitemap](https://en.wikipedia.org/wiki/Sitemaps) or individual HTML page.
 
 ### Options
 
@@ -23,14 +23,14 @@ npm install -g html-auditor
 ### Example
 
 ```
-html-fetch --uri http://www.bbc.com/sport/sitemap.xml --dir ./html-pages
+html-audit fetch --uri https://www.washingtonpost.com/web-national-sitemap.xml --dir ./html-pages
 ```
 
 # Audit HTML
 
 ## 1. Accessibility audit (WCAG)
 
-`a11y-audit`: audit HTML pages for accessibility issues.
+`html-audit a11y`: audit HTML pages for accessibility issues.
 
 ### Options
 
@@ -46,12 +46,12 @@ html-fetch --uri http://www.bbc.com/sport/sitemap.xml --dir ./html-pages
 ### Example
 
 ```
-a11y-audit --path ./html-pages --report ./report --standard WCAG2AA --ignore 'notice;warning'
+html-audit a11y --path ./html-pages --report ./report --standard WCAG2AA --ignore 'notice;warning'
 ```
 
 ## 2. HTML5 validation audit
 
-`html5-audit`: audit HTML pages for HTML5 validation issues.
+`html-audit html5`: audit HTML pages for HTML5 validation issues.
 
 ### Options
 
@@ -65,12 +65,12 @@ a11y-audit --path ./html-pages --report ./report --standard WCAG2AA --ignore 'no
 ### Example
 
 ```
-html5-audit --path ./html-pages --report ./report --errors-only
+html-audit html5 --path ./html-pages --report ./report --errors-only
 ```
 
 ## 3. Link audit
 
-`link-audit`: audit HTML pages for link issues.
+`html-audit link`: audit HTML pages for link issues.
 
 ### Options
 
@@ -85,7 +85,7 @@ html5-audit --path ./html-pages --report ./report --errors-only
 ### Example
 
 ```
-link-audit --path ./html-pages --report ./report --base-uri http://example.com --report-verbose
+html-audit link --path ./html-pages --report ./report --base-uri http://example.com --report-verbose
 ```
 
 # Development
