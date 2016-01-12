@@ -83,15 +83,11 @@ module.exports = function(argv) {
       _stream.end(data);
       var XML = new XMLStream(_stream);
       XML.on('endElement: url', function(item) {
-        if (modified && !_.has(item, 'lastmod')) {
-          XML.pause();
-          throw new Error('<lastmod> element not found');
-        }
         var _uri = '';
         if (_.has(item, 'loc')) {
           // Get location (uri).
           var location = item.loc;
-          if (modified) {
+          if (modified && _.has(item, 'lastmod')) {
             // Get sitemap modified date time.
             var _modified = new Date(item.lastmod).getTime();
             // Get input modified date time.
@@ -108,7 +104,6 @@ module.exports = function(argv) {
             }
           }
           else {
-            // Set location.
             _uri = location;
           }
         }
