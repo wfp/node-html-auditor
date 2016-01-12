@@ -48,6 +48,6 @@
   },
   "license": "MIT",
   "scripts": {
-    "eslint": "node_modules/.bin/eslint --config=.eslintrc bin/* helpers/*"
+    "eslint": "node_modules/.bin/eslint --config=.eslintrc bin/* helpers/* modules/*"
   }
 }

@@ -60,10 +60,10 @@ module.exports = function(argv) {
       throw new Error(error);
     }
     var data = '';
-    var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+    var rx = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
     // Check URI.
-    uri = uri && regex.test(uri) ? uri : (function() {
-      var message = '%s isn\'t valid uri, please provide correct --uri argument';
+    uri = uri && rx.test(uri) ? uri : (function() {
+      var message = '%s isn\'t valid uri';
       throw new Error(format(message, uri));
     })();
     // Do HTTP call for sitemap XML URI.
@@ -103,7 +103,14 @@ module.exports = function(argv) {
               console.log('%s is up-to-date', location.green);
             }
           }
+          else if (modified && !_.has(item, 'lastmod')) {
+            isModified = true;
+            // Set location.
+            _uri = location;
+          }
           else {
+            isModified = false;
+            // Set location.
             _uri = location;
           }
         }
@@ -198,4 +205,4 @@ module.exports = function(argv) {
       throw new Error(error);
     }).end();
   };
-}
+};
