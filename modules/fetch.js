@@ -62,7 +62,10 @@ module.exports = function(argv) {
     var data = '';
     // Do HTTP call for sitemap XML URI.
     request(uri, function(error, response, body) {
-      if (response.statusCode === 404) {
+      if (error) {
+        throw new Error(error.message);
+      }
+      if (response.statusCode !== 200) {
         throw new Error(uri + ' not found.');
       }
     }).on('data', function(string) {
