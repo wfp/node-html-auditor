@@ -60,14 +60,12 @@ module.exports = function(argv) {
       throw new Error(error);
     }
     var data = '';
-    var rx = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-    // Check URI.
-    uri = uri && rx.test(uri) ? uri : (function() {
-      var message = '%s isn\'t valid uri';
-      throw new Error(format(message, uri));
-    })();
     // Do HTTP call for sitemap XML URI.
-    request(uri).on('data', function(string) {
+    request(uri, function(error, response, body) {
+      if (response.statusCode === 404) {
+        throw new Error(uri + ' not found.');
+      }
+    }).on('data', function(string) {
       data += string;
     }).on('end', function() {
       var _stream = new stream.PassThrough();

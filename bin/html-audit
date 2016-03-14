@@ -45,7 +45,7 @@ if (!command) {
 process.on('uncaughtException', function(error) {
   // Log errors.
   process.stdout.write(error.message.red + '\n');
-  process.stdout.write('Invalid command. Use: html-audit --help' +
+  process.stdout.write('Invalid command. Use: html-audit --help '.yellow +
     'for more information\n'.yellow);
   process.exit(1);
 });
