@@ -39,7 +39,6 @@ html-audit fetch --uri https://www.washingtonpost.com/web-national-sitemap.xml -
 - `--standard [standard]` (default: `WCAG2AA`) - Accessibility standard as per [pa11y](https://github.com/nature/pa11y#standard-string)
 - `--report [path]` - path to output JSON audit report
 - `--ignore [types]` - types to ignore separated by semi-colons (`notice;warning`)
-- `--phantomjs [path]` - define the path to the phantomjs binary
 - `--map` _(required when --lastmod is provided)_ - file to output JSON that maps file names to URLs. If not set, sends to stdout
 - `--lastmod` _(optional)_ - Scan last modified files
 
