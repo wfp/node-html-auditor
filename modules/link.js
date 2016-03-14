@@ -19,9 +19,9 @@ var files = require('../helpers/files');
 var BLC = require('broken-link-checker');
 
 module.exports = function(argv) {
-  // Help text template.
-  var help = 'link-audit usage:\n' +
-    '\tlink-audit [options]\n' +
+  // Help text.
+  var help = 'html-audit link usage:\n' +
+    '\thtml-audit link [options]\n' +
     'Options\n' +
     '\t--help                                                               ' +
     'Display this error message\n' +

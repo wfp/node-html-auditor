@@ -18,9 +18,9 @@ var report = require('../helpers/report');
 var files = require('../helpers/files');
 
 module.exports = function(argv) {
-  // Help text template.
-  var help = 'html5-audit usage:\n' +
-    '\thtml5-audit [options]\n' +
+  // Help text.
+  var help = 'html-audit html5 usage:\n' +
+    '\thtml-audit html5 [options]\n' +
     'Options\n' +
     '\t--help                                                               ' +
     'Display this error message\n' +

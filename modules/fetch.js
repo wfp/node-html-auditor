@@ -21,9 +21,9 @@ var mkdirp = require('mkdirp');
 var _ = require('underscore');
 
 module.exports = function(argv) {
-  // Help text template.
-  var help = 'html-fetch usage:\n' +
-    '\thtml-fetch [options]\n' +
+  // Help text.
+  var help = 'html-audit fetch usage:\n' +
+    '\thtml-audit fetch [options]\n' +
     'Options\n' +
     '\t--help                                                   ' +
     'Display this error message\n' +

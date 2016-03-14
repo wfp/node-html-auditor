@@ -22,9 +22,9 @@ module.exports = function(argv) {
     throw new Error('Environment PATH not found.');
   }
 
-  // Help text template.
-  var help = 'a11y-audit usage:\n' +
-    '\ta11y-audit [options]\n' +
+  // Help text.
+  var help = 'html-audit a11y usage:\n' +
+    '\thtml-audit a11y [options]\n' +
     'Options\n' +
     '\t--help                                                          ' +
     'Display this error message\n' +
