@@ -11,6 +11,7 @@
  * Module dependencies.
  */
 var path   = require('path');
+var phantomjs = require('phantomjs-prebuilt');
 var colors = require('colors');
 var async  = require('async');
 var pa11y  = require('pa11y');
@@ -37,8 +38,6 @@ module.exports = function(argv) {
     'Path to output JSON audit report\n' +
     '\t--ignore    [types]                                             ' +
     'Types to ignore separated by semi-colons (notice,warning)\n' +
-    '\t--phantomjs [path]                                              ' +
-    'Define the path to the phantomjs binary\n' +
     '\t--map       [file]        (required when --lastmod is provided) ' +
     'File containing filename:url object\n' +
     '\t--lastmod                                                       ' +
@@ -56,8 +55,6 @@ module.exports = function(argv) {
   var _report = argv.report || '';
   // Get standard.
   var standard = argv.standard || 'WCAG2AA';
-  // Get executable phantomjs path.
-  var phantomjs = argv.phantomjs;
   // Get ignore.
   var ignore = argv.ignore || [];
   // Get JSON map path.
@@ -77,6 +74,9 @@ module.exports = function(argv) {
       debug: console.log.bind(console),
       error: console.error.bind(console),
       info:  console.info.bind(console)
+    },
+    phantom: {
+      path: phantomjs.path
     }
   };
   if (ignore && typeof ignore === 'string') {
@@ -85,12 +85,7 @@ module.exports = function(argv) {
     // Add ignore option.
     options['ignore'] = ignore;
   }
-  if (phantomjs && typeof phantomjs === 'string') {
-    // Add phantomjs option.
-    options['phantom'] = {
-      path: phantomjs
-    };
-  }
+
   var i = 1;
   // Instantiate pa11y.
   var _patty = pa11y(options);
