@@ -26,6 +26,11 @@ module.exports = function(file, files, map, modified, callback) {
     if (modified) {
       // Get modified files.
       fs.readFile(map, 'utf-8', function(error, data) {
+        if (error && error.code === 'ENOENT') {
+          var _error = '\nThe file ' + map + ' does not exist.\n';
+          _error += 'You must specify an existent  map file.';
+          throw new Error(_error);
+        }
         if (error) {
           throw new Error(error);
         }
