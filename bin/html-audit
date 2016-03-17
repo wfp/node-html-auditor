@@ -43,8 +43,10 @@ if (!command) {
 }
 
 process.on('uncaughtException', function(error) {
+  // Error message prefix.
+  var prefix = 'html-audit ' + command + ' reported an error: ';
   // Log errors.
-  process.stdout.write(error.message.red + '\n');
+  process.stdout.write(prefix.red + error.message.red + '\n');
   process.stdout.write('Invalid command. Use: html-audit --help '.yellow +
     'for more information\n'.yellow);
   process.exit(1);
