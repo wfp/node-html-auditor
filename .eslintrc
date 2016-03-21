@@ -73,6 +73,11 @@ rules:
   # list: http://eslint.org/docs/rules/#ecmascript-6
   ## Suggest using 'const' wherever possible
   prefer-const: 2
+  prefer-template: 2
+  no-var: 2
+  prefer-arrow-callback: 2
+  prefer-reflect: 2
+  prefer-spread: 2
 
   # Strict Mode
   # list: https://github.com/eslint/eslint/tree/master/docs/rules#strict-mode
@@ -85,9 +90,8 @@ rules:
   no-undef: 2
 
   # Custom rules in tools/eslint-rules
-#  require-buffer: 2
-#  new-with-error: [2, "Error", "RangeError", "TypeError", "SyntaxError", "ReferenceError"]
-
+  #  require-buffer: 2
+  #  new-with-error: [2, "Error", "RangeError", "TypeError", "SyntaxError", "ReferenceError"]
 
 # Global scoped method and vars
 globals:
