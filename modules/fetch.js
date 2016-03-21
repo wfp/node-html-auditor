@@ -21,7 +21,7 @@ const _ = require('underscore');
 
 module.exports = (argv) => {
 
-/*eslint-disable max-len*/
+  /*eslint-disable max-len*/
   // Prepare help text.
   const help = `html-audit fetch usage:
         html-audit fetch [options]
@@ -32,7 +32,7 @@ Options
         --map      [file] (required  when --lastmod is provided) File to output JSON that maps file names to URLs. If not set, sends to stdout
         --lastmod  [date]                                        Date for downloading last modified content
 `;
-/*eslint-enable max-len*/
+  /*eslint-enable max-len*/
 
   // Get arg - sitemap uri.
   const uri = argv.uri;
@@ -48,7 +48,7 @@ Options
     process.exit(0);
   }
 
-  dir = path.resolve(path.normalize(dir));
+  dir = path.resolve(dir);
 
   /**
    * Make http request for sitemap uri and get XML.
@@ -61,7 +61,7 @@ Options
       if (error) {
         callback(error);
       }
-      if (response.statusCode === 404) {
+      if (response.statusCode !== 200) {
         callback(`${uri} not found - status code: ${response.statusCode}`);
       }
     }).on('data', (data) => {
@@ -98,18 +98,15 @@ Options
             _modified > __modified;
           if (condition) {
             isModified = true;
-            // Set location.
             _uri = location;
           }
         }
         else if (modified && !_.has(item, 'lastmod')) {
           isModified = true;
-          // Set location.
           _uri = location;
         }
         else {
           isModified = false;
-          // Set location.
           _uri = location;
         }
       }
@@ -121,7 +118,6 @@ Options
       if (_uri) {
         callback(null, _uri, isModified);
       }
-
     });
   };
 
@@ -149,11 +145,9 @@ Options
       }).on('end', _ => {
         // Log filename.
         console.log(`${filename.green} has been added`);
-        // Stream - end.
         stream.end();
         callback(null, filename);
       }).on('error', (error) => {
-        // Stream - end.
         stream.end();
         callback(error);
       }).end();
@@ -166,6 +160,7 @@ Options
     }
 
     let i = 0;
+    let mapJSON = '';
     const _map = {
       uris: {},
       modified: []
@@ -181,6 +176,11 @@ Options
         }
 
         _map.uris[filename] = uri;
+
+        if (modified) {
+          _map.modified.push(path.join(dir, filename));
+        }
+
         if (map && typeof map === 'string') {
           // Get map directory.
           const dirname = path.dirname(path.normalize(map));
@@ -192,28 +192,28 @@ Options
 
             // Get map basename.
             const basename = path.basename(map).split('.');
-            // Create [MAP].json file.
-            const mapJSON = path.join(dirname, `${basename[0]}.json`);
-            fs.readFile(mapJSON, 'utf-8', (error, data) => {
-              if (modified) {
-                _map.modified.push(path.join(dir, filename));
-                if (data) {
-                  _map.uris = _.extend(_map.uris, JSON.parse(data).uris);
-                }
-              }
-
-              // Create map file
-              // - filename:url object.
-              // - last modified file paths object.
-              const stream = fs.createWriteStream(mapJSON);
-              stream.write(JSON.stringify(_map));
-              stream.end();
-            });
+            // Prepare [MAP].json file.
+            mapJSON = path.join(dirname, `${basename[0]}.json`);
           });
+        }
+
+        if (Object.keys(_map.uris).length === i) {
+          if (mapJSON) {
+            // Create map file.
+            // - filename:url object.
+            // - last modified file paths object.
+            const stream = fs.createWriteStream(mapJSON);
+            stream.write(JSON.stringify(_map));
+            stream.end();
+          }
+          else {
+            console.dir(_map);
+          }
+          console.log('fetch has completed'.green);
         }
       });
       i++;
     });
   });
-
 };
+
