@@ -12,45 +12,52 @@
 /**
  * Module dependencies.
  */
-var argv = require('yargs').argv;
-var pjson = require('../package.json');
-var colors = require('colors');
+const argv = require('yargs').argv;
+const pjson = require('../package.json');
+const colors = require('colors');
 
 // Check for version.
 if (argv.version) {
-  process.stdout.write(pjson.version.green + '\n');
+  process.stdout.write(`${pjson.version.green}
+`);
   process.exit(0);
 }
 
 // Help text.
-var help = 'html-audit usage:\n' +
-  '\thtml-audit [command]\n' +
-  'Commands\n' +
-  '\tfetch   Fetch XML sitemap and download HTML pages.\n' +
-  '\ta11y    Audit HTML pages for accessibility (WCAG2) compliance.\n' +
-  '\thtml5   Audit HTML pages for HTML5 compliance.\n' +
-  '\tlink    Audit HTML pages for issues with links.\n' +
-  'Options\n' +
-  '\t--help     Display this help message.\n' +
-  '\t--version  Display version number.\n';
+const help = `html-audit usage:
+        html-audit [command]
+
+Commands
+        fetch   Fetch XML sitemap and download HTML pages.
+        a11y    Audit HTML pages for accessibility (WCAG2) compliance.
+        html5   Audit HTML pages for HTML5 compliance.
+        link    Audit HTML pages for issues with links.
+
+Options
+        --help     Display this help message.
+        --version  Display version number.
+`;
 
 // Get command.
-var command = argv._[0];
+const command = argv._[0];
 // Check for command existence.
 if (!command) {
-  process.stdout.write(help.yellow + '\n');
+  process.stdout.write(help.yellow);
   process.exit(0);
 }
 
-process.on('uncaughtException', function(error) {
-  // Error message prefix.
-  var prefix = 'html-audit ' + command + ' reported an error: ';
+process.on('uncaughtException', (error) => {
   // Log errors.
-  process.stdout.write(prefix.red + error.message.red + '\n');
-  process.stdout.write('Invalid command. Use: html-audit --help '.yellow +
-    'for more information\n'.yellow);
+  process.stdout.write(
+  `html-audit ${command} reported an error: ${error.message}
+`.red
+  );
+  process.stdout.write(
+  `Invalid command. Use: html-audit --help for more information
+`.yellow
+  );
   process.exit(1);
 });
 
 // Run command.
-require('../modules/' + command)(argv);
+require(`../modules/${command}`)(argv);
