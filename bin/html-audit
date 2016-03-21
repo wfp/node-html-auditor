@@ -23,6 +23,7 @@ if (argv.version) {
   process.exit(0);
 }
 
+/*eslint-disable max-len*/
 // Help text.
 const help = `html-audit usage:
         html-audit [command]
@@ -37,6 +38,7 @@ Options
         --help     Display this help message.
         --version  Display version number.
 `;
+/*eslint-disable max-len*/
 
 // Get command.
 const command = argv._[0];

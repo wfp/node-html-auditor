@@ -20,36 +20,35 @@ const mkdirp = require('mkdirp');
 const _ = require('underscore');
 
 module.exports = (argv) => {
+
+/*eslint-disable max-len*/
   // Prepare help text.
-  const help = 'html-audit fetch usage:\n' +
-    '\thtml-audit fetch [options]\n' +
-    'Options\n' +
-    '\t--help                                                   ' +
-    'Display this error message\n' +
-    '\t--uri      [URI]  (required)                             ' +
-    'Path or URL to XML Sitemap file\n' +
-    '\t--dir      [path] (required)                             ' +
-    'Directory to output HTML files\n' +
-    '\t--map      [file] (required when --lastmod is provided)  ' +
-    'File to output JSON that maps file names to URLs. If not set, sends to ' +
-    'stdout\n' +
-    '\t--lastmod  [date]                                        ' +
-    'Date for downloading last modified content';
+  const help = `html-audit fetch usage:
+        html-audit fetch [options]
+Options
+        --help                                                   Display this help message
+        --uri      [URI]  (required)                             Path or URL to XML Sitemap file
+        --dir      [path] (required)                             Directory to output HTML files
+        --map      [file] (required  when --lastmod is provided) File to output JSON that maps file names to URLs. If not set, sends to stdout
+        --lastmod  [date]                                        Date for downloading last modified content
+`;
+/*eslint-enable max-len*/
 
   // Get arg - sitemap uri.
   const uri = argv.uri;
   // Get arg - sitemap htmls directory.
-  const dir = argv.dir;
-  // Get arg - map directory.
+  let dir = argv.dir;
+  // Get arg - map file.
   const map = argv.map;
   // Get arg - last modified date.
   const modified = argv.lastmod || '';
 
   if (argv.help || (!uri || !dir) || (modified && !map)) {
-    process.stdout.write(`${help.yellow}
-  `);
+    process.stdout.write(help.yellow);
     process.exit(0);
   }
+
+  dir = path.resolve(path.normalize(dir));
 
   /**
    * Make http request for sitemap uri and get XML.
@@ -134,7 +133,6 @@ module.exports = (argv) => {
    * @param {Function} callback
    */
   const getSitemapContent = (uri, key, callback) => {
-    const directory = path.resolve(path.normalize(dir));
     // Create sitemap htmls directory.
     mkdirp(dir, '0777', (error) => {
       if (error) {
@@ -143,7 +141,7 @@ module.exports = (argv) => {
       // Prepare unique filename.
       const filename = `sitemap-${key}.html`;
       // Create file.
-      const stream = fs.createWriteStream(path.join(directory, filename));
+      const stream = fs.createWriteStream(path.join(dir, filename));
       // Make HTTP request for each of the uri & get HTML content.
       request(uri).on('data', (data) => {
         // Write HTML content in file.
@@ -153,7 +151,7 @@ module.exports = (argv) => {
         console.log(`${filename.green} has been added`);
         // Stream - end.
         stream.end();
-        callback(null, directory, filename);
+        callback(null, filename);
       }).on('error', (error) => {
         // Stream - end.
         stream.end();
@@ -167,17 +165,17 @@ module.exports = (argv) => {
       throw new Error(error);
     }
 
+    let i = 0;
+    const _map = {
+      uris: {},
+      modified: []
+    };
     getUrisFromXML(XML, (error, uri, modified) => {
       if (error) {
         throw new Error(error);
       }
 
-      let i = 0;
-      let _map = {
-        uris: {},
-        modified: []
-      };
-      getSitemapContent(uri, i, (error, directory, filename) => {
+      getSitemapContent(uri, i, (error, filename) => {
         if (error) {
           throw new Error(error);
         }
@@ -185,9 +183,9 @@ module.exports = (argv) => {
         _map.uris[filename] = uri;
         if (map && typeof map === 'string') {
           // Get map directory.
-          var dirname = path.dirname(path.normalize(map));
+          const dirname = path.dirname(path.normalize(map));
           // Create map directory.
-          mkdirp(dirname, '0777', function(error) {
+          mkdirp(dirname, '0777', (error) => {
             if (error) {
               throw new Error(error);
             }
@@ -195,10 +193,10 @@ module.exports = (argv) => {
             // Get map basename.
             const basename = path.basename(map).split('.');
             // Create [MAP].json file.
-            const mapJSON = path.join(dirname, basename[0] + '.json');
-            fs.readFile(mapJSON, 'utf-8', function(error, data) {
+            const mapJSON = path.join(dirname, `${basename[0]}.json`);
+            fs.readFile(mapJSON, 'utf-8', (error, data) => {
               if (modified) {
-                _map.modified.push(path.join(directory, filename));
+                _map.modified.push(path.join(dir, filename));
                 if (data) {
                   _map.uris = _.extend(_map.uris, JSON.parse(data).uris);
                 }
@@ -207,7 +205,7 @@ module.exports = (argv) => {
               // Create map file
               // - filename:url object.
               // - last modified file paths object.
-              var stream = fs.createWriteStream(mapJSON);
+              const stream = fs.createWriteStream(mapJSON);
               stream.write(JSON.stringify(_map));
               stream.end();
             });
