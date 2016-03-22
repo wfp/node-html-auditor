@@ -20,7 +20,6 @@ const mkdirp = require('mkdirp');
 const _ = require('underscore');
 
 module.exports = (argv) => {
-
   /*eslint-disable max-len*/
   // Prepare help text.
   const help = `html-audit fetch usage:
@@ -143,7 +142,7 @@ Options
         // Write HTML content in file.
         stream.write(data);
       }).on('end', () => {
-        // Log filename.
+        // Log.
         console.log(`${filename.green} has been added`);
         callback(null, filename);
       }).on('error', (error) => {
@@ -205,9 +204,11 @@ Options
             stream.end();
           }
           else {
+            // Log.
             console.dir(_map);
           }
-          console.log('fetch has completed'.green);
+          // Log.
+          console.log('Download has completed'.green);
         }
       });
       i++;

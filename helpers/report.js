@@ -23,25 +23,32 @@ const mkdirp = require('mkdirp');
  * @param {String} file
  */
 module.exports = function(data, report, file) {
+  // Prepare data.
   data = JSON.stringify(data);
-  // Prepare report directory.
-  report = path.resolve(report);
-  // Prepare report file.
-  file = path.join(report, file);
-  // Create directory.
-  mkdirp(report, '0777', (error) => {
-    if (error) {
-      throw new Error(error);
-    }
-    // Stream - create file.
-    const stream = fs.createWriteStream(file);
-    // Stream - error event.
-    stream.on('error', (error) => {
-      throw new Error(error);
+  if (report) {
+    // Prepare report directory.
+    report = path.resolve(report);
+    // Prepare report file.
+    file = path.join(report, file);
+    // Create directory.
+    mkdirp(report, '0777', (error) => {
+      if (error) {
+        throw new Error(error);
+      }
+      // Stream - create file.
+      const stream = fs.createWriteStream(file);
+      // Stream - error event.
+      stream.on('error', (error) => {
+        throw new Error(error);
+      });
+      // Stream - write.
+      stream.write(data);
+      // Log.
+      console.log(`${file} has been created`.green);
     });
-    // Stream - write.
-    stream.write(data);
+  }
+  else {
     // Log.
-    console.log(`${file} has been created`.green);
-  });
+    console.dir(data);
+  }
 };
