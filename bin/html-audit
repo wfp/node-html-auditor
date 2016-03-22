@@ -36,7 +36,7 @@ Options
         --help     Display this help message.
         --version  Display version number.
 `;
-/*eslint-disable max-len*/
+/*eslint-enable max-len*/
 
 // Get command.
 const command = argv._[0];
