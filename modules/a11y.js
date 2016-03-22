@@ -51,7 +51,7 @@ Options
   // Get arg - accessibility standard.
   const standard = argv.standard || 'WCAG2AA';
   // Get arg - ignore.
-  const ignore = argv.ignore || [];
+  let ignore = argv.ignore || [];
   // Get arg - JSON map file.
   const map = argv.map;
   // Get arg - modified boolean.
@@ -64,7 +64,7 @@ Options
 
   // Prepare pa11y options.
   const options = {
-    standard: standard,
+    standard,
     log:      {
       debug: console.log.bind(console),
       error: console.error.bind(console),

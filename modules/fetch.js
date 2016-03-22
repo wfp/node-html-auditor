@@ -66,7 +66,7 @@ Options
       }
     }).on('data', (data) => {
       XML += data;
-    }).on('end', _ => {
+    }).on('end', () => {
       callback(null, XML);
     }).on('error', (error) => {
       callback(error);
@@ -142,13 +142,11 @@ Options
       request(uri).on('data', (data) => {
         // Write HTML content in file.
         stream.write(data);
-      }).on('end', _ => {
+      }).on('end', () => {
         // Log filename.
         console.log(`${filename.green} has been added`);
-        stream.end();
         callback(null, filename);
       }).on('error', (error) => {
-        stream.end();
         callback(error);
       }).end();
     });
