@@ -24,16 +24,14 @@ if (argv.version) {
 }
 
 /*eslint-disable max-len*/
-// Help text.
+// Prepare help text.
 const help = `html-audit usage:
         html-audit [command]
-
 Commands
         fetch   Fetch XML sitemap and download HTML pages.
         a11y    Audit HTML pages for accessibility (WCAG2) compliance.
         html5   Audit HTML pages for HTML5 compliance.
         link    Audit HTML pages for issues with links.
-
 Options
         --help     Display this help message.
         --version  Display version number.
@@ -42,7 +40,6 @@ Options
 
 // Get command.
 const command = argv._[0];
-// Check for command existence.
 if (!command) {
   process.stdout.write(help.yellow);
   process.exit(0);
@@ -60,6 +57,8 @@ process.on('uncaughtException', (error) => {
   );
   process.exit(1);
 });
+
+process.umask(0);
 
 // Run command.
 require(`../modules/${command}`)(argv);
