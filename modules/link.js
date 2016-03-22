@@ -138,6 +138,7 @@ Options
             html: result.html.tag,
             url
           };
+          
           if (verbose) {
             // Append verbose result.
             _result['verbose'] = result;

@@ -60,6 +60,7 @@ Options
       if (error) {
         callback(error);
       }
+
       if (response.statusCode !== 200) {
         callback(`${uri} not found - status code: ${response.statusCode}`);
       }
@@ -133,6 +134,7 @@ Options
       if (error) {
         callback(error);
       }
+
       // Prepare unique filename.
       const filename = `sitemap-${key}.html`;
       // Create file.
@@ -207,6 +209,7 @@ Options
             // Log.
             console.dir(_map);
           }
+          
           // Log.
           console.log('Download has completed'.green);
         }

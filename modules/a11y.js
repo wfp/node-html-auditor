@@ -74,6 +74,7 @@ Options
       path: phantomjs.path
     }
   };
+  
   if (ignore && typeof ignore === 'string') {
     // Get ignore object.
     ignore = ignore.split(';');
@@ -93,6 +94,7 @@ Options
         if (error) {
           throw new Error(error);
         }
+
         // Create report.
         report({
           assessibility: data
