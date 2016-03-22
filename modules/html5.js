@@ -78,12 +78,14 @@ Options
             // Store result in _data variable.
             _data.push(object);
           });
+
           if (i === length) {
             // Create report.
             report({
               html5: _.groupBy(_data, 'filename')
             }, _report, 'html5-report.json');
           }
+
           i++;
         }
       });
