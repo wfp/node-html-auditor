@@ -26,11 +26,11 @@ module.exports = (argv) => {
   const help = `html-audit fetch usage:
         html-audit fetch [options]
 Options
-        --help                                                   Display this help message
-        --uri      [URI]  (required)                             Path or URL to XML Sitemap file
-        --dir      [path] (required)                             Directory to output HTML files
-        --map      [file] (required  when --lastmod is provided) File to output JSON that maps file names to URLs. If not set, sends to stdout
-        --lastmod  [date]                                        Date for downloading last modified content
+        --help                                                    Display help text
+        --uri      [URI]  (required)                              Path or URL to XML Sitemap file
+        --dir      [path] (required)                              Directory to output HTML files
+        --map      [file] (required  when --lastmod is provided)  File to output JSON that maps file names to URLs and modified files. If not set, sends to stdout
+        --lastmod  [date]                                         Date for downloading last modified content
 `;
   /*eslint-enable max-len*/
 
@@ -38,7 +38,7 @@ Options
   const uri = argv.uri;
   // Get arg - sitemap htmls directory.
   let dir = argv.dir;
-  // Get arg - map file.
+  // Get arg - JSON map file.
   const map = argv.map;
   // Get arg - last modified date.
   const modified = argv.lastmod || '';

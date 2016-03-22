@@ -28,15 +28,15 @@ module.exports = (argv) => {
   const help = `html-audit a11y usage:
         html-audit a11y [options]
 Options
-        --help                                                    Display this help message
-        --path      [path / file] (required)                      Path to HTML files or an HTML file to audit
-        --standard  [standard]    (default: WCAG2AA)              Accessibility standard as per https://github.com/nature/pa11y#standard-string'
-        --report    [path]                                        Path to output JSON audit report
-        --ignore    [types]                                       Types to ignore separated by semi-colons (notice,warning)
-        --map       [file]  (required when --lastmod is provided) File containing filename:url object
-        --lastmod                                                 Scan last modified files
+        --help                                                           Display help text
+        --path      [path / file] (required)                             Path to HTML files or an HTML file to audit
+        --standard  [standard]    (default: WCAG2AA)                     Accessibility standard as per https://github.com/nature/pa11y#standard-string'
+        --report    [path]                                               Path to output JSON audit report
+        --ignore    [types]                                              Types to ignore separated by semi-colons (notice,warning)
+        --map       [file]        (required when --lastmod is provided)  JSON map file which holds modified files data
+        --lastmod                                                        Scan last modified files
 `;
-  /*eslint-disable max-len*/
+  /*eslint-enable max-len*/
 
   if (argv.help) {
     process.stdout.write(help.yellow);
