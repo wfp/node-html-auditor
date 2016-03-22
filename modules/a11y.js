@@ -74,7 +74,7 @@ Options
       path: phantomjs.path
     }
   };
-  
+
   if (ignore && typeof ignore === 'string') {
     // Get ignore object.
     ignore = ignore.split(';');

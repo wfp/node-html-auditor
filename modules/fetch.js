@@ -209,7 +209,7 @@ Options
             // Log.
             console.dir(_map);
           }
-          
+
           // Log.
           console.log('Download has completed'.green);
         }
