@@ -2,7 +2,7 @@
  * @file link-audit.js
  * @author Lasha Badashvili (lashab@picktek.com)
  *
- * Scan HTML links (using broken-link-checker module).
+ * Scan links (using broken-link-checker module).
  */
 
 'use strict';
@@ -10,91 +10,106 @@
 /**
  * Module dependencies.
  */
-var url = require('url');
-var fs = require('fs');
-var colors = require('colors');
-var _ = require('underscore');
-var report = require('../helpers/report');
-var files = require('../helpers/files');
-var BLC = require('broken-link-checker');
+const fs = require('fs');
+const colors = require('colors');
+const BLC = require('broken-link-checker');
+const _ = require('underscore');
+const report = require('../helpers/report');
+const files = require('../helpers/files');
 
 module.exports = function(argv) {
-  // Help text.
-  var help = 'html-audit link usage:\n' +
-    '\thtml-audit link [options]\n' +
-    'Options\n' +
-    '\t--help                                                               ' +
-    'Display this error message\n' +
-    '\t--path           [path / file] (required)                            ' +
-    'Path to HTML files or an HTML file to audit\n' +
-    '\t--base-uri       [URI]         (required)                            ' +
-    'The base URL of the site being audited\n' +
-    '\t--report         [path]                                              ' +
-    'Path to output JSON audit report\n' +
-    '\t--report-verbose                                                     ' +
-    'Verbose report\n' +
-    '\t--map            [file]        (required when --lastmod is provided) ' +
-    'File containing filename:url object\n' +
-    '\t--lastmod                                                            ' +
-    'Scan last modified files';
+  /*eslint-disable max-len*/
+  // Prepare help text.
+  const help = `html-audit link usage:
+        html-audit link [options]
+Options
+        --help                                                                Display help text
+        --path           [path / file] (required)                             Path to HTML files or an HTML file to audit
+        --base-uri       [URI]         (required)                             The base URL of the site being audited
+        --report         [path]                                               Path to output JSON audit report
+        --report-verbose                                                      Verbose report
+        --map            [file]        (required when --lastmod is provided)  JSON map file which holds modified files data
+        --lastmod                                                             Scan last modified files
+`;
+  /*eslint-enable max-len*/
 
   if (argv.help) {
-    process.stdout.write(help.yellow + '\n');
+    process.stdout.write(help.yellow);
     process.exit(0);
   }
 
-  var _data = [];
-  // Get path to file.
-  var path = argv.path;
-  // Get report directory.
-  var _report = argv.report;
-  // Get base uri.
-  var uri = argv['base-uri'];
-  // Get JSON map path.
-  var map = argv.map;
-  // Get modified boolean.
-  var modified = argv.lastmod || false;
+  const _data = [];
+  // Get arg - path to file.
+  const path = argv.path;
+  // Get arg - report directory.
+  const _report = argv.report;
+  // Get arg - base uri.
+  const uri = argv['base-uri'];
+  // Get arg - JSON map file.
+  const map = argv.map;
+  // Get arg - modified boolean.
+  const modified = argv.lastmod || false;
+  // Get arg - report verbose.
+  const verbose = argv['report-verbose'] || '';
+
   if ((!path || !uri) || (modified && !map)) {
-    process.stdout.write(help.yellow + '\n');
+    process.stdout.write(help.yellow);
     process.exit(0);
   }
 
-  // Regex for uri.
-  var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-  if (!regex.test(uri)) {
-    var message = 'You entered incorrect base uri --base-uri=';
-    throw new Error(message + uri);
-  }
-
+  let i = 1;
   // Get file(s).
-  files(path, argv._, map, modified, function(file) {
+  files(path, argv._, map, modified, (file, length) => {
     // Get content.
-    fs.readFile(file, 'utf-8', function(error, content) {
+    fs.readFile(file, 'utf-8', (error, content) => {
       if (error) {
         throw new Error(error);
       }
+
       // Test file.
-      check(file).scan(content, uri);
+      check(file, (_data) => {
+        if (i === length) {
+          // Get _data length.
+          const length = _data.length;
+          if (length) {
+            // Group by filename.
+            const data = _.groupBy(_data, 'filename');
+            for (const i in data) {
+              for (const j in data[i]) {
+                // Omit filename property.
+                data[i][j] = _.omit(data[i][j], 'filename');
+              }
+            }
+
+            // Create report.
+            report({
+              link: data
+            }, _report, 'links-report.json');
+          }
+        }
+
+        i++;
+      }).scan(content, uri);
     });
   });
 
   /**
-   * @callback check - Test file.
+   * Check file.
    *
    * @param {String} file
-   * @return {Object} new BLC instance.
+   * @param {Function} callback
+   *
+   * @return {Object} BLC object.
    */
-  var check = function(file) {
+  const check = function(file, callback) {
     return new BLC.HtmlChecker({ filterLevel: 3 }, {
-      link: function(result) {
-        console.log('Scanning %s'.green, file);
-        var verbose = argv['report-verbose'] || '';
-        var condition = true;
-        var error = '';
+      link: (result) => {
+        let condition = true;
+        let error = '';
         // Get original url.
-        var url = result.url;
+        const url = result.url;
         // Get base original url.
-        var base = result.base.original;
+        const base = result.base.original;
         // Get links with 404 response.
         // Get links which has tag a & has base uri in href.
         // Get links which has internal & redirected property true.
@@ -115,50 +130,32 @@ module.exports = function(argv) {
         else {
           condition = false;
         }
+
         if (condition) {
-          var _result = {
-            error: error,
+          const _result = {
+            error,
             filename: file,
             html: result.html.tag,
-            url: url
+            url
           };
           if (verbose) {
-            // Append entire result.
+            // Append verbose result.
             _result['verbose'] = result;
           }
+
           // Store result in _data variable.
           _data.push(_result);
           // Log.
-          console.log('Errors found for %s'.red, url.original);
+          console.log(`${error} - ${url.original}`.red);
         }
         else {
           // Log.
-          console.log('%s passed scan test successfuly'.green, url.original);
+          console.log(`Test passed - ${url.original}`.green);
         }
+
       },
-      complete: function() {
-        // Get _data variable length.
-        var length = _data.length;
-        if (length) {
-          // Group by filename.
-          // Omit filename property.
-          var data = _.groupBy(_data, 'filename');
-          for (var i in data) {
-            for (var j in data[i]) {
-              data[i][j] = _.omit(data[i][j], 'filename');
-            }
-          }
-          // Create report.
-          report({
-            link: data
-          }, _report, 'links-report.json');
-          // Log.
-          console.log('%d errors found'.red, length);
-        }
-        else {
-          // Log.
-          console.log('Congrats! 0 errors found'.green);
-        }
+      complete: () => {
+        callback(_data);
       }
     });
   };
