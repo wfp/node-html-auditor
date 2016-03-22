@@ -2,7 +2,7 @@
  * @file a11y-audit.js
  * @author Lasha Badashvili (lashab@picktek.com)
  *
- * Scan HTML files (using pa11y module).
+ * Accessibility testing - (using pa11y module).
  */
 
 'use strict';
@@ -10,65 +10,60 @@
 /**
  * Module dependencies.
  */
-var path   = require('path');
-var phantomjs = require('phantomjs-prebuilt');
-var colors = require('colors');
-var async  = require('async');
-var pa11y  = require('pa11y');
-var report = require('../helpers/report');
-var files  = require('../helpers/files');
+const path = require('path');
+const phantomjs = require('phantomjs-prebuilt');
+const colors = require('colors');
+const async  = require('async');
+const pa11y  = require('pa11y');
+const report = require('../helpers/report');
+const files  = require('../helpers/files');
 
-module.exports = function(argv) {
+module.exports = (argv) => {
   if (!process.env.PATH) {
     throw new Error('Environment PATH not found.');
   }
 
-  // Help text.
-  var help = 'html-audit a11y usage:\n' +
-    '\thtml-audit a11y [options]\n' +
-    'Options\n' +
-    '\t--help                                                          ' +
-    'Display this error message\n' +
-    '\t--path      [path / file] (required)                            ' +
-    'Path to HTML files or an HTML file to audit\n' +
-    '\t--standard  [standard]    (default: WCAG2AA)                    ' +
-    'Accessibility standard as per ' +
-    'https://github.com/nature/pa11y#standard-string\n' +
-    '\t--report    [path]                                              ' +
-    'Path to output JSON audit report\n' +
-    '\t--ignore    [types]                                             ' +
-    'Types to ignore separated by semi-colons (notice,warning)\n' +
-    '\t--map       [file]        (required when --lastmod is provided) ' +
-    'File containing filename:url object\n' +
-    '\t--lastmod                                                       ' +
-    'Scan last modified files';
+  /*eslint-disable max-len*/
+  // Prepare help text.
+  const help = `html-audit a11y usage:
+        html-audit a11y [options]
+Options
+        --help                                                    Display this help message
+        --path      [path / file] (required)                      Path to HTML files or an HTML file to audit
+        --standard  [standard]    (default: WCAG2AA)              Accessibility standard as per https://github.com/nature/pa11y#standard-string'
+        --report    [path]                                        Path to output JSON audit report
+        --ignore    [types]                                       Types to ignore separated by semi-colons (notice,warning)
+        --map       [file]  (required when --lastmod is provided) File containing filename:url object
+        --lastmod                                                 Scan last modified files
+`;
+  /*eslint-disable max-len*/
 
   if (argv.help) {
-    process.stdout.write(help.yellow + '\n');
+    process.stdout.write(help.yellow);
     process.exit(0);
   }
 
-  var _data = {};
-  // Get path to file.
-  var _path = argv.path;
-  // Get report directory.
-  var _report = argv.report || '';
-  // Get standard.
-  var standard = argv.standard || 'WCAG2AA';
-  // Get ignore.
-  var ignore = argv.ignore || [];
-  // Get JSON map path.
-  var map = argv.map;
-  // Get modified boolean.
-  var modified = argv.lastmod || false;
+  const _data = {};
+  // Get arg - path to file.
+  const _path = argv.path;
+  // Get arg - report directory.
+  const _report = argv.report || '';
+  // Get arg - accessibility standard.
+  const standard = argv.standard || 'WCAG2AA';
+  // Get arg - ignore.
+  const ignore = argv.ignore || [];
+  // Get arg - JSON map file.
+  const map = argv.map;
+  // Get arg - modified boolean.
+  const modified = argv.lastmod || false;
 
   if (!_path || (modified && !map)) {
-    process.stdout.write(help.yellow + '\n');
+    process.stdout.write(help.yellow);
     process.exit(0);
   }
 
   // Prepare pa11y options.
-  var options = {
+  const options = {
     standard: standard,
     log:      {
       debug: console.log.bind(console),
@@ -86,16 +81,15 @@ module.exports = function(argv) {
     options['ignore'] = ignore;
   }
 
-  var i = 1;
-  // Instantiate pa11y.
-  var _patty = pa11y(options);
+  let i = 1;
+  const _patty = pa11y(options);
   // Get file(s).
-  files(_path, argv._, map, modified, function(file, length) {
+  files(_path, argv._, map, modified, (file, length) => {
     // Prepare _data object.
-    _data[file] = _patty.run.bind(_patty, 'file://' + path.resolve(file));
+    _data[file] = _patty.run.bind(_patty, `file://${path.resolve(file)}`);
     if (i === length) {
       // Test file(s).
-      async.series(_data, function(error, data) {
+      async.series(_data, (error, data) => {
         if (error) {
           throw new Error(error);
         }
