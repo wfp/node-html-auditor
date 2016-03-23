@@ -17,7 +17,6 @@ const XMLStream = require('xml-stream');
 const request = require('request');
 const colors = require('colors');
 const mkdirp = require('mkdirp');
-const _ = require('underscore');
 
 module.exports = (argv) => {
   /*eslint-disable max-len*/
@@ -86,10 +85,10 @@ Options
     _stream.end(XML);
     new XMLStream(_stream).on('endElement: url', (item) => {
       let _uri = '';
-      if (_.has(item, 'loc')) {
+      if ('loc' in item) {
         // Get location (uri).
         const location = item.loc;
-        if (modified && _.has(item, 'lastmod')) {
+        if (modified && 'lastmod' in item) {
           // Get sitemap modified date time.
           const _modified = new Date(item.lastmod).getTime();
           // Get input modified date time.
@@ -101,7 +100,7 @@ Options
             _uri = location;
           }
         }
-        else if (modified && !_.has(item, 'lastmod')) {
+        else if (modified && !('lastmod' in item)) {
           isModified = true;
           _uri = location;
         }
