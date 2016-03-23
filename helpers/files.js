@@ -19,8 +19,8 @@ const colors = require('colors');
  *
  * @param {String} file
  * @param {Object} files
- * @param {Object} files
- * @param {Object} files
+ * @param {Object} map
+ * @param {Object} modified
  * @param {Function} callback
  */
 module.exports = (file, files, map, modified, callback) => {
