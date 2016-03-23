@@ -158,7 +158,6 @@ Options
     }
 
     let i = 0;
-    let mapJSON = '';
     const _map = {
       uris: {},
       modified: []
@@ -179,30 +178,26 @@ Options
           _map.modified.push(path.join(dir, filename));
         }
 
-        if (map && typeof map === 'string') {
-          // Get map directory.
-          const dirname = path.dirname(path.normalize(map));
-          // Create map directory.
-          mkdirp(dirname, '0777', (error) => {
-            if (error) {
-              throw new Error(error);
-            }
-
-            // Get map basename.
-            const basename = path.basename(map).split('.');
-            // Prepare [MAP].json file.
-            mapJSON = path.join(dirname, `${basename[0]}.json`);
-          });
-        }
-
         if (Object.keys(_map.uris).length === i) {
-          if (mapJSON) {
-            // Create map file.
-            // - filename:url object.
-            // - last modified file paths object.
-            const stream = fs.createWriteStream(mapJSON);
-            stream.write(JSON.stringify(_map));
-            stream.end();
+          if (map && typeof map === 'string') {
+            // Get map directory.
+            const dirname = path.dirname(path.normalize(map));
+            // Create map directory.
+            mkdirp(dirname, '0777', (error) => {
+              if (error) {
+                throw new Error(error);
+              }
+
+              // Get map basename.
+              const basename = path.basename(map).split('.');
+              // Prepare [MAP].json file.
+              const mapJSON = path.join(dirname, `${basename[0]}.json`);
+              // Create map file.
+              // - filename:url object.
+              // - last modified file paths object.
+              const stream = fs.createWriteStream(mapJSON);
+              stream.write(JSON.stringify(_map));
+            });
           }
           else {
             // Log.
