@@ -80,42 +80,42 @@ Options
    */
   const getUrisFromXML = (XML, callback) => {
     const _stream = new stream.PassThrough();
-    let isModified = false;
-    // Store data.
     _stream.end(XML);
-    new XMLStream(_stream).on('endElement: url', (item) => {
+    const _XML =  new XMLStream(_stream);
+    let _modified = false;
+    _XML.on('endElement: url', (item) => {
       let _uri = '';
       if ('loc' in item) {
         // Get location (uri).
         const location = item.loc;
         if (modified && 'lastmod' in item) {
           // Get sitemap modified date time.
-          const _modified = new Date(item.lastmod).getTime();
+          const __modified = new Date(item.lastmod).getTime();
           // Get input modified date time.
-          const __modified = new Date(modified).getTime();
-          const condition = _modified === __modified ||
-            _modified > __modified;
+          const ___modified = new Date(modified).getTime();
+          const condition = __modified === ___modified ||
+            __modified > ___modified;
           if (condition) {
-            isModified = true;
+            _modified = true;
             _uri = location;
           }
         }
         else if (modified && !('lastmod' in item)) {
-          isModified = true;
+          _modified = true;
           _uri = location;
         }
         else {
-          isModified = false;
+          _modified = false;
           _uri = location;
         }
       }
       else {
-        XML.pause();
+        _XML.pause();
         callback('<loc> element not found');
       }
 
       if (_uri) {
-        callback(null, _uri, isModified);
+        callback(null, _uri, _modified);
       }
     });
   };
