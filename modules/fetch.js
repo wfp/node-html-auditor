@@ -22,7 +22,7 @@ module.exports = {
   /**
    * Execute fetch.
    */
-  execute: function(argv) {
+  execute(argv) {
     // Get arg - sitemap uri.
     const uri = argv.uri;
     // Get arg - sitemap htmls directory.
@@ -33,70 +33,77 @@ module.exports = {
     const modified = argv.lastmod || '';
 
     if (argv.help || (!uri || !dir) || (modified && !map)) {
-      process.stdout.write(this.help());
+      // Log.
+      console.log(this.help());
       process.exit(0);
     }
 
     // Make http request for sitemap uri.
-    this.request(uri, (error, status, XML) => {
-      status = response.statusCode || false;
+    this.request(uri, (error, _404, XML) => {
       if (error) {
         throw new Error(error);
       }
-      else if (status && status !== 200) {
-        throw new Error(`${uri} not found - status code: ${status}`);
+
+      if (_404) {
+        throw new Error(_404);
       }
 
       let i = 0;
+      let j = 0;
       const _map = {
         uris: {},
         modified: []
       };
 
-      // Get uris [<loc>] from XML. 
+      // Get uris [<loc>] from XML.
       this.getUrisFromXML(XML, modified, (error, uri, modified) => {
         if (error) {
           throw new Error(error);
         }
 
+        j++;
         // Make http request for [<loc>] uri.
-        this.request(uri, (error, status, HTML) => {
+        this.request(uri, (error, _404, HTML) => {
           if (error) {
-            // Log & skip.
-            console.dir(error);
+            throw new Error(error);
           }
 
-          i++;
-          // Add sitemap-[ID].html.
-          this.addSitemap(HTML, `sitemap-${i}.html`, dir, (error, basename, file) => {
-            if (error) {
-              throw new Error(error);
-            }
+          if (_404) {
+            // Log.
+            console.log(_404);
+          }
+          else {
+            i++;
+            // Prepare sitemap-[ID].html file.
+            const basename = `sitemap-${i}.html`;
+            // Add sitemap-[ID].html file.
+            this.addSitemap(HTML, basename, dir, (error, basename, file) => {
+              if (error) {
+                throw new Error(error);
+              }
 
-            _map.uris[basename] = uri;
+              if (modified) {
+                _map.modified.push(file);
+              }
 
-            if (modified) {
-              _map.modified.push(file);
-            }
+              _map.uris[basename] = uri;
 
-            console.log(`${file}.green has been added`);
+              // Log.
+              console.log(`${file.green} has been added`);
 
-            if (Object.keys(_map.uris).length === i) {
-              // Add sitemap map | Log.
-              this.addSitemapMap(_map, map, (error, mapJSON) => {
-                if (error) {
-                  throw new Error(error);
-                }
+              if (i === j) {
+                // Add sitemap [MAP].json file | Log.
+                this.addSitemapMap(_map, map, (error, mapJSON) => {
+                  if (error) {
+                    throw new Error(error);
+                  }
 
-                // Log.
-                console.log(`${mapJSON}.green has been added
-                `);
-
-                // Log.
-                console.log('Fetch has completed'.green);
-              });
-            }
-          });
+                  // Log.
+                  console.log(`${mapJSON.cyan} has been created`);
+                });
+              }
+            });
+          }
         });
       });
     });
@@ -108,14 +115,13 @@ module.exports = {
   help: () => {
     /*eslint-disable max-len*/
     const help = `html-audit fetch usage:
-          html-audit fetch [options]
-  Options
-          --help                                                    Display help text
-          --uri      [URI]  (required)                              Path or URL to XML Sitemap file
-          --dir      [path] (required)                              Directory to output HTML files
-          --map      [file] (required  when --lastmod is provided)  File to output JSON that maps file names to URLs and modified files. If not set, sends to stdout
-          --lastmod  [date]                                         Date for downloading last modified content
-  `;
+        html-audit fetch [options]
+Options
+        --help                                                    Display help text
+        --uri      [URI]  (required)                              Path or URL to XML Sitemap file
+        --dir      [path] (required)                              Directory to output HTML files
+        --map      [file] (required  when --lastmod is provided)  File to output JSON that maps file names to URLs and modified files. If not set, sends to stdout
+        --lastmod  [date]                                         Date for downloading last modified content`;
     /*eslint-enable max-len*/
 
     return help.yellow;
@@ -124,21 +130,25 @@ module.exports = {
   /**
    * Make http request.
    *
-   * @param {String} uri 
+   * @param {String} uri
    * @param {Function} callback
    */
   request: (uri, callback) => {
     let content = '';
-    request(uri, (error, response, body) => {
-      callback(error, response.statusCode);
+    request(uri).on('response', (response) => {
+      if (response && response.statusCode === 404) {
+        callback(null, `${uri} not found - code: ${response.statusCode}`.red);
+      }
     }).on('data', (data) => {
-      XML = data;
-    }).on('end', () => {
-      if (content) {
-        callback(null, null, content);
+      if (data.length) {
+        content += data;
       }
     }).on('error', (error) => {
       callback(error);
+    }).on('end', () => {
+      if (content.length) {
+        callback(null, null, content);
+      }
     }).end();
   },
 
@@ -251,14 +261,15 @@ module.exports = {
         });
 
         // Stream - write in file.
-        stream.write(JSON.stringify(_map));
+        stream.write(JSON.stringify(data));
 
-        callack(null, mapJSON);
+        callback(null, mapJSON);
       });
     }
     else {
       // Log.
-      console.dir(data);
+      console.log(data);
     }
   }
 };
+
