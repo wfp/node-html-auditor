@@ -61,4 +61,4 @@ process.on('uncaughtException', (error) => {
 process.umask(0);
 
 // Run command.
-require(`../modules/${command}`)(argv);
+require(`../modules/${command}`).execute(argv);
