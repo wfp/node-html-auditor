@@ -38,7 +38,7 @@ module.exports = {
       process.exit(0);
     }
 
-    this.html5Lint(path, argv._, map, modified, errorsOnly, (error, data) => {
+    this.scan(path, argv._, map, modified, errorsOnly, (error, data) => {
       if (error) {
         throw new Error(error);
       }
@@ -70,7 +70,7 @@ Options
   },
 
   /**
-   * Run html5Lint.
+   * Scan files using html5Lint.
    *
    * @param {String} file
    * @param {Object} _files
@@ -79,11 +79,15 @@ Options
    * @param {Boolean} errorsOnly
    * @param {Function} callback
    */
-  html5Lint: (file, _files, map, modified, errorsOnly, callback) => {
+  scan: (file, _files, map, modified, errorsOnly, callback) => {
     const _data = [];
     let i = 1;
     // Get file(s).
-    files(file, _files, map, modified, (file, length) => {
+    files(file, _files, map, modified, (error, file, length) => {
+      if (error) {
+        throw new Error(error);
+      }
+
       // Get file content.
       fs.readFile(file, 'utf-8', (error, content) => {
         if (error) {

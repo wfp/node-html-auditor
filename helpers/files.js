@@ -24,85 +24,63 @@ const colors = require('colors');
  * @param {Function} callback
  */
 module.exports = (file, files, map, modified, callback) => {
-  /**
-   * Get HTML modified file(s) from map file.
-   *
-   * @param {Function} callback
-   */
-  const getModifiedFiles = (callback) => {
-    // Get modified files from map file.
-    fs.readFile(map, 'utf-8', (error, data) => {
-      if (error && error.code === 'ENOENT') {
-        /*eslint-disable max-len*/
-        error.message = `The file ${map} does not exist \n You must specify an existent map file`;
-        /*eslint-enable max-len*/
-        throw new Error(error);
-      }
-
-      if (error) {
-        throw new Error(error);
-      }
-
-      callback(JSON.parse(data).modified);
-    });
-  };
-
-  /**
-   * Get HTML file(s) from directory.
-   *
-   * @param {Function} callback
-   */
-  const getFiles = (callback) => {
-    // Get file(s) from directory.
-    files.shift();
-    files.push(file);
-    for (const i in files) {
-      // Get file.
-      file = files[i];
-      // Get file stats.
-      fs.lstat(file, (error, stats) => {
-        if (error) {
-          throw new Error(error);
-        }
-
-        // Remove slash.
-        file = path.resolve(file);
-        // Case path is directory.
-        // Get all files from directory.
-        // Passing files array to the callback e.g - [path/to/file.html ..]
-        if (stats.isDirectory()) {
-          // Read directory & get all files from directory.
-          fs.readdir(file, (error, _files) => {
-            if (error) {
-              throw new Error(error);
-            }
-
-            // Update files path.
-            _files.forEach((_file, key, _files) => {
-              _files[key] = path.join(file, _file);
-            });
-
-            callback(_files);
-          });
-        }
-        else {
-          callback(files);
-        }
-      });
-      break;
-    }
-  };
-
   ((_callback) => {
     if (modified) {
-      getModifiedFiles((files) => {
-        _callback(files);
+      // Get modified files from map file.
+      fs.readFile(map, 'utf-8', (error, data) => {
+        if (error && error.code === 'ENOENT') {
+          /*eslint-disable max-len*/
+          error.message = `The file ${map} does not exist \n You must specify an existent map file`;
+          /*eslint-enable max-len*/
+          callback(error);
+        }
+
+        if (error) {
+          callback(error);
+        }
+
+        _callback(JSON.parse(data).modified);
       });
     }
     else {
-      getFiles((files) => {
-        _callback(files);
-      });
+      // Get file(s) from directory.
+      files.shift();
+      files.push(file);
+      for (const i in files) {
+        // Get file.
+        file = files[i];
+        // Get file stats.
+        fs.lstat(file, (error, stats) => {
+          if (error) {
+            callback(error);
+          }
+
+          // Remove slash.
+          file = path.resolve(file);
+          // Case path is directory.
+          // Get all files from directory.
+          // Passing files array to the callback e.g - [path/to/file.html ..]
+          if (stats.isDirectory()) {
+            // Read directory & get all files from directory.
+            fs.readdir(file, (error, _files) => {
+              if (error) {
+                callback(error);
+              }
+
+              // Update files path.
+              _files.forEach((_file, key, _files) => {
+                _files[key] = path.join(file, _file);
+              });
+
+              _callback(_files);
+            });
+          }
+          else {
+            _callback(files);
+          }
+        });
+        break;
+      }
     }
   })((files) => {
     let i = files.length;
@@ -117,7 +95,7 @@ module.exports = (file, files, map, modified, callback) => {
     }
 
     files.forEach((file) => {
-      callback(file, files.length);
+      callback(null, file, files.length);
     });
   });
 };

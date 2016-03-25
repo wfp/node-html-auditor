@@ -63,8 +63,7 @@ module.exports = {
       options['ignore'] = ignore.split(',');
     }
 
-    // Run pa11y.
-    this.pa11y(options, _path, argv._, map, modified, (error, data) => {
+    this.scan(options, _path, argv._, map, modified, (error, data) => {
       if (error) {
         throw new Error();
       }
@@ -97,7 +96,7 @@ Options
   },
 
   /**
-   * Run pa11y.
+   * Scan files using pa11y.
    *
    * @param {Object} options
    * @param {String} file
@@ -106,12 +105,16 @@ Options
    * @param {Boolean} modified
    * @param {Function} callback
    */
-  pa11y: (options, file, _files, map, modified, callback) => {
-    const _patty = pa11y(options);
+  scan: (options, file, _files, map, modified, callback) => {
     const _data = {};
+    const _patty = pa11y(options);
     let i = 1;
     // Get file(s).
-    files(file, _files, map, modified, (file, length) => {
+    files(file, _files, map, modified, (error, file, length) => {
+      if (error) {
+        throw new Error(error);
+      }
+
       // Prepare _data object.
       _data[file] = _patty.run.bind(_patty, `file://${path.resolve(file)}`);
       if (i === length) {
