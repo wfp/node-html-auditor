@@ -1,5 +1,5 @@
 /**
- * @file html-fetch.js
+ * @file fetch.js
  * @author Lasha Badashvili (lashab@picktek.com)
  *
  * Fetches sitemap URIs & downloads HTML content.

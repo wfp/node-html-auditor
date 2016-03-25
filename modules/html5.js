@@ -1,5 +1,5 @@
 /**
- * @file html5-audit.js
+ * @file html5.js
  * @author Lasha Badashvili (lashab@picktek.com)
  *
  * HTML5 validator (using html5-lint module).

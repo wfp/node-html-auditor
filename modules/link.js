@@ -1,5 +1,5 @@
 /**
- * @file link-audit.js
+ * @file link.js
  * @author Lasha Badashvili (lashab@picktek.com)
  *
  * Scan links (using broken-link-checker module).
