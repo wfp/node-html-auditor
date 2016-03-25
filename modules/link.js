@@ -17,10 +17,48 @@ const _ = require('underscore');
 const report = require('../helpers/report');
 const files = require('../helpers/files');
 
-module.exports = function(argv) {
-  /*eslint-disable max-len*/
-  // Prepare help text.
-  const help = `html-audit link usage:
+module.exports = {
+  /**
+   * Execute link.
+   */
+  execute(argv) {
+    // Get arg - path to file.
+    const path = argv.path;
+    // Get arg - report directory.
+    const _report = argv.report;
+    // Get arg - base uri.
+    const uri = argv['base-uri'];
+    // Get arg - JSON map file.
+    const map = argv.map;
+    // Get arg - modified boolean.
+    const modified = argv.lastmod || false;
+    // Get arg - report verbose.
+    const verbose = argv['report-verbose'] || '';
+
+    if ((argv.help || !path || !uri) || (modified && !map)) {
+      // Log.
+      console.log(this.help());
+      process.exit(0);
+    }
+
+    this.scan(path, argv._, map, modified, uri, verbose, (error, data) => {
+      if (error) {
+        throw new Error(error);
+      }
+
+      // Create report.
+      report({
+        link: data
+      }, _report, 'links-report.json');
+    });
+  },
+
+  /**
+   * Get help text.
+   */
+  help: () => {
+    /*eslint-disable max-len*/
+    const help = `html-audit link usage:
         html-audit link [options]
 Options
         --help                                                                Display help text
@@ -29,49 +67,40 @@ Options
         --report         [path]                                               Path to output JSON audit report
         --report-verbose                                                      Verbose report
         --map            [file]        (required when --lastmod is provided)  JSON map file which holds modified files data
-        --lastmod                                                             Scan last modified files
-`;
-  /*eslint-enable max-len*/
+        --lastmod                                                             Scan last modified files`;
+    /*eslint-enable max-len*/
 
-  if (argv.help) {
-    process.stdout.write(help.yellow);
-    process.exit(0);
-  }
+    return help.yellow;
+  },
 
-  const _data = [];
-  // Get arg - path to file.
-  const path = argv.path;
-  // Get arg - report directory.
-  const _report = argv.report;
-  // Get arg - base uri.
-  const uri = argv['base-uri'];
-  // Get arg - JSON map file.
-  const map = argv.map;
-  // Get arg - modified boolean.
-  const modified = argv.lastmod || false;
-  // Get arg - report verbose.
-  const verbose = argv['report-verbose'] || '';
-
-  if ((!path || !uri) || (modified && !map)) {
-    process.stdout.write(help.yellow);
-    process.exit(0);
-  }
-
-  let i = 1;
-  // Get file(s).
-  files(path, argv._, map, modified, (file, length) => {
-    // Get content.
-    fs.readFile(file, 'utf-8', (error, content) => {
+  /**
+   * Scan files using BLC.
+   *
+   * @param {String} file
+   * @param {Object} _files
+   * @param {String} map
+   * @param {Boolean} modified
+   * @param {String} uri
+   * @param {Boolean} verbose
+   * @param {Function} callback
+   */
+  scan(file, _files, map, modified, uri, verbose, callback) {
+    let i = 1;
+    // Get file(s).
+    files(file, _files, map, modified, (error, file, length) => {
       if (error) {
         throw new Error(error);
       }
 
-      // Test file.
-      check(file, (_data) => {
-        if (i === length) {
-          // Get _data length.
-          const length = _data.length;
-          if (length) {
+      // Get content.
+      fs.readFile(file, 'utf-8', (error, content) => {
+        if (error) {
+          callback(error);
+        }
+
+        // Test file.
+        this.BLC(file, verbose, (_data) => {
+          if (i === length && _data.length) {
             // Group by filename.
             const data = _.groupBy(_data, 'filename');
             for (const i in data) {
@@ -81,27 +110,26 @@ Options
               }
             }
 
-            // Create report.
-            report({
-              link: data
-            }, _report, 'links-report.json');
+            callback(null, data);
           }
-        }
 
-        i++;
-      }).scan(content, uri);
+          i++;
+        }).scan(content, uri);
+      });
     });
-  });
+  },
 
   /**
-   * Check file.
+   * BLC object.
    *
    * @param {String} file
+   * @param {Boolean} verbose
    * @param {Function} callback
    *
    * @return {Object} BLC object.
    */
-  const check = function(file, callback) {
+  BLC(file, verbose, callback) {
+    const _data = [];
     return new BLC.HtmlChecker({ filterLevel: 3 }, {
       link: (result) => {
         let condition = true;
@@ -159,5 +187,5 @@ Options
         callback(_data);
       }
     });
-  };
+  }
 };
