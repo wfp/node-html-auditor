@@ -35,6 +35,7 @@ module.exports = (data, report, file) => {
       if (error) {
         throw new Error(error);
       }
+      
       // Stream - create file.
       const stream = fs.createWriteStream(file);
       // Stream - error event.

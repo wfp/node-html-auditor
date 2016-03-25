@@ -65,7 +65,7 @@ module.exports = {
 
     this.scan(options, _path, argv._, map, modified, (error, data) => {
       if (error) {
-        throw new Error();
+        throw new Error(error);
       }
 
       // Create report.
