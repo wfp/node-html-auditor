@@ -22,7 +22,7 @@ const mkdirp = require('mkdirp');
  * @param {String} report
  * @param {String} file
  */
-module.exports = function(data, report, file) {
+module.exports = (data, report, file) => {
   // Prepare data.
   data = JSON.stringify(data);
   if (report) {
@@ -49,6 +49,6 @@ module.exports = function(data, report, file) {
   }
   else {
     // Log.
-    console.dir(data);
+    console.log(data);
   }
 };
