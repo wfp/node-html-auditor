@@ -18,8 +18,8 @@ const colors = require('colors');
 
 // Check for version.
 if (argv.version) {
-  process.stdout.write(`${pjson.version.green}
-`);
+  // Log.
+  console.log(`${pjson.version.green}`);
   process.exit(0);
 }
 
@@ -34,14 +34,14 @@ Commands
         link    Audit HTML pages for issues with links.
 Options
         --help     Display this help message.
-        --version  Display version number.
-`;
+        --version  Display version number.`.yellow;
 /*eslint-enable max-len*/
 
 // Get command.
 const command = argv._[0];
 if (!command) {
-  process.stdout.write(help.yellow);
+  // Log.
+  console.log(help);
   process.exit(0);
 }
 
