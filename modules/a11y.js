@@ -20,7 +20,7 @@ const files  = require('../helpers/files');
 
 module.exports = {
   /**
-   * Execute fetch.
+   * Execute a11y.
    */
   execute(argv) {
     if (!process.env.PATH) {
@@ -81,7 +81,6 @@ module.exports = {
    */
   help: () => {
     /*eslint-disable max-len*/
-    // Prepare help text.
     const help = `html-audit a11y usage:
         html-audit a11y [options]
 Options
