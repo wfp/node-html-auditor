@@ -85,7 +85,7 @@ Options
     // Get file(s).
     files(file, _files, map, modified, (error, file, length) => {
       if (error) {
-        throw new Error(error);
+        callback(error);
       }
 
       // Get file content.
