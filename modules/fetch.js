@@ -146,9 +146,7 @@ Options
     }).on('error', (error) => {
       callback(error);
     }).on('end', () => {
-      if (content.length) {
-        callback(null, null, content);
-      }
+      callback(null, null, content);
     }).end();
   },
 
