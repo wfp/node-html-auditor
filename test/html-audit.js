@@ -6,8 +6,6 @@ describe('html-audit', function() {
   context('fetch', () => {
     it(`should fetch ${uri}`, (done) => {
       const date = new Date();
-      // lastmod: date.toISOString(),
-      date.setHours(date.getHours() - 5);
       require('../modules/fetch').execute({ 
         _: [ 'fetch' ],
         uri: 'https://www.washingtonpost.com/web-national-sitemap.xml',
