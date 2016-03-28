@@ -74,7 +74,8 @@ Options
         --report       [path]                                               Path to output JSON audit report
         --errors-only                                                       Only report errors (no notices or warnings)
         --map          [file]        (required when --lastmod is provided)  JSON map file which holds modified files data
-        --lastmod                                                           Scan last modified files`;
+        --lastmod                                                           Scan last modified files
+        --validator                                                         Manually specify validator service default http://html5.validator.nu/`; 
     /*eslint-enable max-len*/
 
     return help.yellow;
