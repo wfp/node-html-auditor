@@ -1,5 +1,5 @@
 /**
- * @file html-fetch.js
+ * @file fetch.js
  * @author Lasha Badashvili (lashab@picktek.com)
  *
  * Fetches sitemap URIs & downloads HTML content.
@@ -10,200 +10,270 @@
 /**
  * Module dependencies.
  */
-var format = require('util').format;
-var stream = require('stream');
-var path = require('path');
-var fs = require('fs');
-var XMLStream = require('xml-stream');
-var request = require('request');
-var colors = require('colors');
-var mkdirp = require('mkdirp');
-var _ = require('underscore');
+const stream = require('stream');
+const path = require('path');
+const fs = require('fs');
+const XMLStream = require('xml-stream');
+const request = require('request');
+const colors = require('colors');
+const mkdirp = require('mkdirp');
 
-module.exports = function(argv) {
-  // Help text.
-  var help = 'html-audit fetch usage:\n' +
-    '\thtml-audit fetch [options]\n' +
-    'Options\n' +
-    '\t--help                                                   ' +
-    'Display this error message\n' +
-    '\t--uri      [URI]  (required)                             ' +
-    'Path or URL to XML Sitemap file\n' +
-    '\t--dir      [path] (required)                             ' +
-    'Directory to output HTML files\n' +
-    '\t--map      [file] (required when --lastmod is provided)  ' +
-    'File to output JSON that maps file names to URLs. If not set, sends to ' +
-    'stdout\n' +
-    '\t--lastmod  [date]                                        ' +
-    'Date for downloading last modified content';
+module.exports = {
+  /**
+   * Execute fetch.
+   *
+   * @param {Object} argv
+   * @param {Function} callback
+   */
+  execute(argv, callback) {
+    // Get arg - sitemap uri.
+    const uri = argv.uri;
+    // Get arg - sitemap htmls directory.
+    const dir = argv.dir;
+    // Get arg - JSON map file.
+    const map = argv.map;
+    // Get arg - last modified date.
+    const modified = argv.lastmod || '';
 
-  // Get uri.
-  var uri = argv.uri;
-  // Get directory.
-  var dir = argv.dir;
-  // Get map directory.
-  var map = argv.map;
-  // Get last modified date.
-  var modified = argv.lastmod || '';
-
-  if (argv.help || (!uri || !dir) || (modified && !map)) {
-    process.stdout.write(help.yellow + '\n');
-    process.exit(0);
-  }
-
-  process.umask(0);
-
-  dir = path.normalize(dir);
-  // Create directory.
-  mkdirp(dir, '0777', function(error) {
-    if (error) {
-      throw new Error(error);
+    if (argv.help || (!uri || !dir) || (modified && !map)) {
+      // Log.
+      console.log(this.help());
+      process.exit(0);
     }
-    var data = '';
-    // Do HTTP call for sitemap XML URI.
-    request(uri, function(error, response, body) {
+
+    // Make http request for sitemap uri.
+    this.request(uri, (error, _404, XML) => {
       if (error) {
-        throw new Error(error);
+        callback(error);
       }
-      if (response.statusCode !== 200) {
-        throw new Error(uri + ' not found.');
+
+      if (_404) {
+        callback(_404);
       }
-    }).on('data', function(string) {
-      data += string;
-    }).on('end', function() {
-      var _stream = new stream.PassThrough();
-      var isModified = false;
-      var stdout = [];
-      var _map = {
+
+      let i = 0;
+      let j = 0;
+      const _map = {
         uris: {},
         modified: []
       };
-      var j = -1;
-      var i = 0;
-      // Store data.
-      _stream.end(data);
-      var XML = new XMLStream(_stream);
-      XML.on('endElement: url', function(item) {
-        var _uri = '';
-        if (_.has(item, 'loc')) {
-          // Get location (uri).
-          var location = item.loc;
-          if (modified && _.has(item, 'lastmod')) {
-            // Get sitemap modified date time.
-            var _modified = new Date(item.lastmod).getTime();
-            // Get input modified date time.
-            var __modified = new Date(modified).getTime();
-            var condition = _modified === __modified ||
-              _modified > __modified;
-            if (condition) {
-              isModified = true;
-              // Set location.
-              _uri = location;
-            }
-            else {
-              console.log('%s is up-to-date', location.green);
-            }
+
+      // Get uris [<loc>] from XML.
+      this.getUrisFromXML(XML, modified, (error, uri, modified) => {
+        if (error) {
+          callback(error);
+        }
+
+        j++;
+        // Make http request for [<loc>] uri.
+        this.request(uri, (error, _404, HTML) => {
+          if (error) {
+            callback(error);
           }
-          else if (modified && !_.has(item, 'lastmod')) {
-            isModified = true;
-            // Set location.
-            _uri = location;
+
+          if (_404) {
+            // Log.
+            console.log(_404);
           }
           else {
-            isModified = false;
-            // Set location.
-            _uri = location;
-          }
-        }
-        else {
-          XML.pause();
-          throw new Error('<loc> element not found');
-        }
-
-        if (_uri) {
-          // Download HTML content.
-          download(_uri, i, function(directory, filename) {
-            // Create filename:url key value object.
-            _map.uris[filename] = _uri;
-            if (map && _.isString(map)) {
-              // Get map directory path.
-              var dirname = path.dirname(path.normalize(map));
-              // Create directory.
-              mkdirp(dirname, '0777', function(error) {
-                if (error) {
-                  throw new Error(error);
-                }
-                // Get map basename.
-                var basename = path.basename(map).split('.');
-                // Create [MAP].json file.
-                var mapJSON = path.join(dirname, basename[0] + '.json');
-                fs.readFile(mapJSON, 'utf-8', function(error, data) {
-                  if (isModified) {
-                    _map.modified.push(path.join(directory, filename));
-                    if (data) {
-                      _map.uris = _.extend(_map.uris, JSON.parse(data).uris);
-                    }
-                  }
-                  // Write - filename:url object.
-                  // Write - last modified file paths object.
-                  var stream = fs.createWriteStream(mapJSON);
-                  stream.write(JSON.stringify(_map));
-                  stream.end();
-                });
-              });
-              j--;
-            }
-            else {
-              // Log _map data object.
-              stdout.push(_map);
-              j--;
-              if (j == 0) {
-                for (var i = 0, length = stdout.length; i < length; i++) {
-                  console.log(JSON.stringify(stdout[i], null, ' '));
-                }
+            i++;
+            // Prepare sitemap-[ID].html file.
+            const basename = `sitemap-${i}.html`;
+            // Add sitemap-[ID].html file.
+            this.addSitemap(HTML, basename, dir, (error, basename, file) => {
+              if (error) {
+                callback(error);
               }
-            }
-          });
-        }
-        i++;
-        j = Math.max(j, i);
+
+              if (modified) {
+                _map.modified.push(file);
+              }
+
+              _map.uris[basename] = uri;
+
+              // Log.
+              console.log(`${file.green} has been added`);
+
+              if (i === j) {
+                // Add sitemap [MAP].json file | Log.
+                this.addSitemapMap(_map, map, (error, mapJSON) => {
+                  if (error) {
+                    callback(error);
+                  }
+
+                  // Log.
+                  console.log(`${mapJSON.cyan} has been created`);
+
+                  callback();
+                });
+              }
+            });
+          }
+        });
       });
-    }).on('error', function(error) {
-      throw new Error(error);
-    }).end();
-  });
+    });
+  },
 
   /**
-   * @callback download - Get HTML content & store in file.
+   * Get help text.
+   */
+  help: () => {
+    /*eslint-disable max-len*/
+    const help = `html-audit fetch usage:
+        html-audit fetch [options]
+Options
+        --help                                                    Display help text
+        --uri      [URI]  (required)                              Path or URL to XML Sitemap file
+        --dir      [path] (required)                              Directory to output HTML files
+        --map      [file] (required  when --lastmod is provided)  File to output JSON that maps file names to URLs and modified files. If not set, sends to stdout
+        --lastmod  [date]                                         Date for downloading last modified content`;
+    /*eslint-enable max-len*/
+
+    return help.yellow;
+  },
+
+  /**
+   * Make http request.
    *
-   * @param {String} url
-   * @param {Number} key
-   * @param {Number} date
+   * @param {String} uri
    * @param {Function} callback
    */
-  function download(url, key, callback) {
-    // Create unique filename.
-    var filename = format('sitemap-%d.html', key);
-    // Get directory.
-    var directory = dir.replace(/\/$/, '');
-    // Create write stream.
-    var stream = fs.createWriteStream(path.join(directory, filename));
-    // Do HTTP call for each of the URL & get HTML content.
-    // Write HTML content in file.
-    request(url).on('data', function(data) {
-      // Write stream.
-      stream.write(data);
-    }).on('end', function() {
-      // Log filename.
-      console.log('%s has been added', filename.green);
-      // Stream - end.
-      stream.end();
-      // Passing _map object to the callback.
-      callback(directory, filename);
-    }).on('error', function(error) {
-      // Stream - close.
-      stream.end();
-      throw new Error(error);
+  request: (uri, callback) => {
+    let content = '';
+    request(uri).on('response', (response) => {
+      if (response && response.statusCode === 404) {
+        callback(null, `${uri} not found - code: ${response.statusCode}`.red);
+      }
+    }).on('data', (data) => {
+      if (data.length) {
+        content += data;
+      }
+    }).on('error', (error) => {
+      callback(error);
+    }).on('end', () => {
+      callback(null, null, content);
     }).end();
-  };
+  },
+
+  /**
+   * Get uris [<loc>] from XML.
+   *
+   * @param {String} XML
+   * @param {Boolean} modified
+   * @param {Function} callback
+   */
+  getUrisFromXML: (XML, modified, callback) => {
+    const _stream = new stream.PassThrough();
+    _stream.end(XML);
+    const _XML =  new XMLStream(_stream);
+    _XML.on('endElement: url', (item) => {
+      let _modified = false;
+      let _uri = '';
+      if ('loc' in item) {
+        // Get location (uri).
+        const location = item.loc;
+        if (modified && 'lastmod' in item) {
+          // Get sitemap modified date time.
+          const __modified = new Date(item.lastmod).getTime();
+          // Get input modified date time.
+          const ___modified = new Date(modified).getTime();
+          const condition = __modified === ___modified ||
+            __modified > ___modified;
+          if (condition) {
+            _uri = location;
+            _modified = true;
+          }
+        }
+        else if (modified && !('lastmod' in item)) {
+          _uri = location;
+          _modified = true;
+        }
+        else {
+          _uri = location;
+        }
+      }
+      else {
+        _XML.pause();
+        callback('<loc> element not found');
+      }
+
+      if (_uri) {
+        callback(null, _uri, _modified);
+      }
+    });
+  },
+
+  /**
+   * Add sitemap file.
+   *
+   * @param {Object} data
+   * @param {String} basename
+   * @param {String} directory
+   * @param {Function} callback
+   */
+  addSitemap: (data, basename, directory, callback) => {
+    directory = path.resolve(directory);
+    // Create sitemap htmls directory.
+    mkdirp(directory, '0777', (error) => {
+      if (error) {
+        callback(error);
+      }
+
+      const file = path.join(directory, basename);
+      // Stream - create sitemap file.
+      const stream = fs.createWriteStream(file);
+      // Stream - error event.
+      stream.on('error', (error) => {
+        callback(error);
+      });
+
+      // Stream - write in file.
+      stream.write(data);
+
+      callback(null, basename, file);
+    });
+  },
+
+  /**
+   * Add sitemap map file | Log.
+   *
+   * @param {Object} data
+   * @param {String} map
+   * @param {Function} callback
+   */
+  addSitemapMap: (data, map, callback) => {
+    if (map && typeof map === 'string') {
+      // Normalize.
+      map = path.resolve(map);
+      // Get map directory.
+      const dirname = path.dirname(map);
+      // Create map directory.
+      mkdirp(dirname, '0777', (error) => {
+        if (error) {
+          callback(error);
+        }
+
+        // Get map basename.
+        const basename = path.basename(map).split('.');
+        // Prepare [MAP].json file.
+        map = path.join(dirname, `${basename[0]}.json`);
+        // Stream - create map file.
+        const stream = fs.createWriteStream(map);
+        // Stream - error event.
+        stream.on('error', (error) => {
+          callback(error);
+        });
+
+        // Stream - write in file.
+        stream.write(JSON.stringify(data));
+
+        callback(null, map);
+      });
+    }
+    else {
+      // Log.
+      console.log(data);
+    }
+  }
 };
+

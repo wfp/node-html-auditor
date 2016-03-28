@@ -10,59 +10,74 @@
 /**
  * Module dependencies.
  */
-var join = require('path').join;
-var fs = require('fs');
-var colors = require('colors');
+const path = require('path');
+const fs = require('fs');
+const colors = require('colors');
 
 /**
- * @callback - Get HTML file(s) from directory.
+ * Get HTML file(s) from directory or modifed files from map file.
  *
  * @param {String} file
  * @param {Object} files
+ * @param {Object} map
+ * @param {Object} modified
  * @param {Function} callback
  */
-module.exports = function(file, files, map, modified, callback) {
-  (function(_callback) {
+module.exports = (file, files, map, modified, callback) => {
+  ((_callback) => {
     if (modified) {
-      // Get modified files.
-      fs.readFile(map, 'utf-8', function(error, data) {
+      // Get map directory.
+      const dirname = path.dirname(map);
+      // Get map basename.
+      const basename = path.basename(map).split('.');
+      // Prepare [MAP].json file.
+      map = path.join(dirname, `${basename[0]}.json`);
+      // Get modified files from map file.
+      fs.readFile(map, 'utf-8', (error, data) => {
         if (error && error.code === 'ENOENT') {
-          var _error = '\nThe file ' + map + ' does not exist.\n';
-          _error += 'You must specify an existent  map file.';
-          throw new Error(_error);
+          /*eslint-disable max-len*/
+          error.message = `The file ${map} does not exist \nYou must specify an existent map file`;
+          /*eslint-enable max-len*/
+          callback(error);
         }
+
         if (error) {
-          throw new Error(error);
+          callback(error);
         }
+
         _callback(JSON.parse(data).modified);
       });
     }
     else {
+      // Get file(s) from directory.
       files.shift();
       files.push(file);
-      for (var i in files) {
+      for (const i in files) {
         // Get file.
         file = files[i];
         // Get file stats.
-        fs.lstat(file, function(error, stats) {
+        fs.lstat(file, (error, stats) => {
           if (error) {
-            throw new Error(error);
+            callback(error);
           }
+
           // Remove slash.
-          file = file.replace(/\/$/, '');
+          file = path.resolve(file);
           // Case path is directory.
           // Get all files from directory.
           // Passing files array to the callback e.g - [path/to/file.html ..]
           if (stats.isDirectory()) {
             // Read directory & get all files from directory.
-            fs.readdir(file, function(error, _files) {
+            fs.readdir(file, (error, _files) => {
               if (error) {
-                throw new Error(error);
+                callback(error);
               }
+
               // Update files path.
-              _files.forEach(function(_file, key, _files) {
-                _files[key] = join(file, _file);
+              _files.forEach((_file, key, _files) => {
+                _files[key] = path.join(file, _file);
               });
+
               _callback(_files);
             });
           }
@@ -70,22 +85,24 @@ module.exports = function(file, files, map, modified, callback) {
             _callback(files);
           }
         });
+
         break;
       }
     }
-  })(function(files) {
-    var i = files.length;
+  })((files) => {
+    let i = files.length;
     while (i--) {
-      var file = files[i];
+      const file = files[i];
       if (!/[a-zA-Z]+(([\-_])?[0-9]+)?\.html$/.test(file)) {
         // Remove non-.html file from files.
         files.splice(files.indexOf(file), 1);
         // Skip & log non-.html files.
-        console.log('Skip %s file'.yellow, file);
+        console.log(`${file} there is not such file or directory`.yellow);
       }
     }
-    files.forEach(function(file) {
-      callback(file, files.length);
+
+    files.forEach((file) => {
+      callback(null, file, files.length);
     });
   });
 };

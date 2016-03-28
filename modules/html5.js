@@ -1,8 +1,8 @@
 /**
- * @file html5-audit.js
+ * @file html5.js
  * @author Lasha Badashvili (lashab@picktek.com)
  *
- * Scan HTML files (using html5-lint module).
+ * HTML5 validator (using html5-lint module).
  */
 
 'use strict';
@@ -10,87 +10,145 @@
 /**
  * Module dependencies.
  */
-var fs = require('fs');
-var html5Lint = require('html5-lint');
-var colors = require('colors');
-var _ = require('underscore');
-var report = require('../helpers/report');
-var files = require('../helpers/files');
+const fs = require('fs');
+const html5Lint = require('html5-lint');
+const colors = require('colors');
+const _ = require('underscore');
+const report = require('../helpers/report');
+const files = require('../helpers/files');
 
-module.exports = function(argv) {
-  // Help text.
-  var help = 'html-audit html5 usage:\n' +
-    '\thtml-audit html5 [options]\n' +
-    'Options\n' +
-    '\t--help                                                               ' +
-    'Display this error message\n' +
-    '\t--path           [path / file] (required)                            ' +
-    'Path to HTML files or an HTML file to audit\n' +
-    '\t--base-uri       [URI]         (required)                            ' +
-    'The base URL of the site being audited\n' +
-    '\t--report         [path]                                              ' +
-    'Path to output JSON audit report\n' +
-    '\t--report-verbose                                                     ' +
-    'Verbose report\n' +
-    '\t--map            [file]        (required when --lastmod is provided) ' +
-    'File containing filename:url object\n' +
-    '\t--lastmod                                                            ' +
-    'Scan last modified files';
+module.exports = {
+  /**
+   * Execute html5.
+   *
+   * @param {Object} argv
+   * @param {Function} callback
+   */
+  execute(argv, callback) {
+    // Get arg - path to file.
+    const path = argv.path;
+    // Get arg - report directory.
+    const _report = argv.report || '';
+    // Get arg - errors only.
+    const errorsOnly = argv['errors-only'] || false;
+    // Get arg - JSON map file.
+    const map = argv.map || '';
+    // Get arg - modified boolean.
+    const modified = argv.lastmod || false;
+    // Get arg - validator service.
+    const service = argv.validator || '';
 
-  if (argv.help) {
-    process.stdout.write(help.yellow + '\n');
-    process.exit(0);
-  }
+    if (argv.help || !path || (modified && !map)) {
+      console.log(this.help());
+      process.exit(0);
+    }
 
-  var _data = [];
-  // Get path to file.
-  var path = argv.path;
-  // Get report directory.
-  var _report = argv.report || '';
-  // Get errors only.
-  var errorsOnly = argv['errors-only'] || false;
-  // Get JSON map path.
-  var map = argv.map || '';
-  // Get modified boolean.
-  var modified = argv.lastmod || false;
-  if (!path || (modified && !map)) {
-    process.stdout.write(help.yellow + '\n');
-    process.exit(0);
-  }
+    // Prepare html5-lint options.
+    const options = {
+      errorsOnly
+    };
 
-  var i = 1;
-  // Get file(s).
-  files(path, argv._, map, modified, function(file, length) {
-    // Get content.
-    fs.readFile(file, 'utf-8', function(error, content) {
+    if (service) {
+      options['service'] = service;
+    }
+
+    this.scan(options, path, argv._, map, modified, (error, data) => {
       if (error) {
-        throw new Error(error);
+        return callback(error);
       }
-      // Test file.
-      html5Lint(content, {
-        errorsOnly: errorsOnly
-      }, function(error, data) {
+
+      // Create report.
+      report({
+        html5: data
+      }, _report, 'html5-report.json', (error) => {
         if (error) {
-          throw new Error(error);
+          callback(error);
         }
-        if (data.messages.length) {
-          // Log file scanning.
-          console.log('Scanning %s'.green, file);
-          data.messages.forEach(function(object) {
-            // Add filename.
-            object.filename = file;
-            // Store result in _data variable.
-            _data.push(object);
-          });
-          if (i === length) {
-            // Create report.
-            report({
-              html5: _.groupBy(_data, 'filename')
-            }, _report, 'html5-report.json');
-          }
-          i++;
-        }
+
+        callback();
       });
     });
-  });
+  },
+
+  /**
+   * Get help text.
+   */
+  help: () => {
+    /*eslint-disable max-len*/
+    const help = `html-audit html5 usage:
+        html-audit html5 [options]
+Options
+        --help                                                              Display help text
+        --path         [path / file] (required)                             Path to HTML files or an HTML file to audit
+        --report       [path]                                               Path to output JSON audit report
+        --errors-only                                                       Only report errors (no notices or warnings)
+        --map          [file]        (required when --lastmod is provided)  JSON map file which holds modified files data
+        --lastmod                                                           Scan last modified files
+        --validator                                                         Manually specify validator service (default: http://html5.validator.nu/)`;
+    /*eslint-enable max-len*/
+
+    return help.yellow;
+  },
+
+  /**
+   * Scan files using html5Lint.
+   *
+   * @param {Object} options
+   * @param {String} file
+   * @param {Object} _files
+   * @param {String} map
+   * @param {Boolean} modified
+   * @param {Function} callback
+   */
+  scan: (options, file, _files, map, modified, callback) => {
+    const _data = [];
+    let i = 1;
+    // Get file(s).
+    files(file, _files, map, modified, (error, file, length) => {
+      if (error) {
+        callback(error);
+      }
+
+      // Get file content.
+      fs.readFile(file, 'utf-8', (error, content) => {
+        if (error) {
+          callback(error);
+        }
+
+        // Test file.
+        html5Lint(content, options, (error, data) => {
+          if (error) {
+            callback(error);
+          }
+
+          // Errors.
+          const errors = data.messages;
+          // Errors count.
+          const count = errors.length;
+
+          if (count) {
+            errors.forEach((object) => {
+              // Add filename.
+              object.filename = file;
+              // Store result in _data variable.
+              _data.push(object);
+            });
+
+            // Log.
+            console.log(`${file} - ${count} errors found`.red);
+          }
+          else {
+            // Log.
+            console.log(`${file} - 0 errors found`.green);
+          }
+
+          if (i === length) {
+            callback(null, _.groupBy(_data, 'filename'));
+          }
+
+          i++;
+        });
+      });
+    });
+  }
 };

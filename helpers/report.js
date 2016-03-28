@@ -10,43 +10,46 @@
 /**
  * Module dependencies.
  */
-var path = require('path');
-var fs = require('fs');
-var colors = require('colors');
-var mkdirp = require('mkdirp');
+const path = require('path');
+const fs = require('fs');
+const colors = require('colors');
+const mkdirp = require('mkdirp');
 
 /**
- * @callback - Create report write stream.
+ * Create report.
  *
  * @param {Object} data
  * @param {String} report
  * @param {String} file
+ * @param {Function} callback
  */
-module.exports = function(data, report, file) {
+module.exports = (data, report, file, callback) => {
+  // Prepare data.
   data = JSON.stringify(data);
-  if (report && typeof report === 'string') {
-    report = path.normalize(report);
+  if (report) {
+    // Prepare report directory.
+    report = path.resolve(report);
+    // Prepare report file.
+    file = path.join(report, file);
     // Create directory.
-    process.umask(0);
-    mkdirp(report, '0777', function(error) {
+    mkdirp(report, '0777', (error) => {
       if (error) {
-        throw new Error(error);
+        callback(error);
       }
-      // Remove slash.
-      report = report.replace(/\/$/, '');
+
       // Stream - create file.
-      var stream = fs.createWriteStream(path.join(report, file));
+      const stream = fs.createWriteStream(file);
       // Stream - error event.
-      stream.on('error', function(error) {
-        throw new Error(error);
+      stream.on('error', (error) => {
+        callback(error);
       });
+
       // Stream - write.
       stream.write(data);
-      // Stream - finish event.
-      stream.on('finish', function() {
-        // Stream - end.
-        stream.end();
-      });
+      // Log.
+      console.log(`${file} has been created`.green);
+
+      callback();
     });
   }
   else {
