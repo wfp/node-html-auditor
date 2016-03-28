@@ -44,10 +44,12 @@
     "yargs": "^3.32.0"
   },
   "devDependencies": {
-    "eslint": "^2.3.0"
+    "eslint": "^2.3.0",
+    "mocha": "^2.4.5"
   },
   "license": "MIT",
   "scripts": {
+    "test": "node_modules/.bin/mocha --timeout 0",
     "eslint": "node_modules/.bin/eslint --config=.eslintrc bin/* helpers/* modules/*"
   }
 }

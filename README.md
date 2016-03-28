@@ -96,3 +96,11 @@ html-audit link --path ./html-pages --report ./report --base-uri http://example.
 # Run code standard review
 npm run eslint
 ```
+
+# Test
+
+```
+npm run test
+
+```
+
