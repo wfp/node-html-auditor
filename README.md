@@ -60,7 +60,7 @@ html-audit a11y --path ./html-pages --report ./report --standard WCAG2AA --ignor
 - `--errors-only` - only report errors (no notices or warnings)
 - `--map` _(required when --lastmod is provided)_ - JSON map file which holds modified files data
 - `--lastmod` _(optional)_ - Scan last modified files
-- `--validator _(optional)_ - Manually specify validator service`
+- `--validator` _(optional)_ - Manually specify validator service
 
 ### Example
 
