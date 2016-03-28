@@ -46,7 +46,7 @@ module.exports = {
 
     this.scan(path, argv._, map, modified, uri, verbose, (error, data) => {
       if (error) {
-        callback(error);
+        return callback(error);
       }
 
       // Create report.
