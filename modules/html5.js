@@ -30,7 +30,7 @@ module.exports = {
     // Get arg - report directory.
     const _report = argv.report || '';
     // Get arg - errors only.
-    const errors = argv['errors-only'] || false;
+    const errorsOnly = argv['errors-only'] || false;
     // Get arg - JSON map file.
     const map = argv.map || '';
     // Get arg - modified boolean.
@@ -43,7 +43,16 @@ module.exports = {
       process.exit(0);
     }
 
-    this.scan(path, argv._, map, modified, errors, service, (error, data) => {
+    // Prepare html5-lint options.
+    const options = {
+      errorsOnly
+    };
+
+    if (service) {
+      options['service'] = service;
+    }
+
+    this.scan(options, path, argv._, map, modified, (error, data) => {
       if (error) {
         return callback(error);
       }
@@ -84,24 +93,15 @@ Options
   /**
    * Scan files using html5Lint.
    *
+   * @param {Object} options
    * @param {String} file
    * @param {Object} _files
    * @param {String} map
    * @param {Boolean} modified
-   * @param {Boolean} errorsOnly
-   * @param {String} service
    * @param {Function} callback
    */
-  scan: (file, _files, map, modified, errorsOnly, service, callback) => {
+  scan: (options, file, _files, map, modified, callback) => {
     const _data = [];
-    const options = {
-      errorsOnly
-    };
-
-    if (service) {
-      options['service'] = service;
-    }
-
     let i = 1;
     // Get file(s).
     files(file, _files, map, modified, (error, file, length) => {
