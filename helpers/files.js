@@ -90,7 +90,7 @@ module.exports = (file, files, map, modified, callback) => {
         // Remove non-.html file from files.
         files.splice(files.indexOf(file), 1);
         // Skip & log non-.html files.
-        console.log(`Skip ${file} file`.yellow);
+        console.log(`Warning: ${file} there is not such file or directory`.yellow);
       }
     }
 
