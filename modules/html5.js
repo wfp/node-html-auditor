@@ -20,8 +20,11 @@ const files = require('../helpers/files');
 module.exports = {
   /**
    * Execute html5.
+   *
+   * @param {Object} argv
+   * @param {Function} callback
    */
-  execute(argv) {
+  execute(argv, callback) {
     // Get arg - path to file.
     const path = argv.path;
     // Get arg - report directory.
@@ -40,13 +43,19 @@ module.exports = {
 
     this.scan(path, argv._, map, modified, errorsOnly, (error, data) => {
       if (error) {
-        throw new Error(error);
+        callback(error);
       }
 
       // Create report.
       report({
         html5: data
-      }, _report, 'html5-report.json');
+      }, _report, 'html5-report.json', (error) => {
+        if (error) {
+          callback(error);
+        }
+
+        callback();
+      });
     });
   },
 
@@ -100,23 +109,32 @@ Options
             callback(error);
           }
 
-          if (data.messages.length) {
-            data.messages.forEach((object) => {
+          // Errors.
+          const errors = data.messages;
+          // Errors count.
+          const count = errors.length;
+
+          if (count) {
+            errors.forEach((object) => {
               // Add filename.
               object.filename = file;
               // Store result in _data variable.
               _data.push(object);
             });
 
-            // Log file scanning.
-            console.log(`Test passed - ${file}`.green);
-
-            if (i === length) {
-              callback(null, _.groupBy(_data, 'filename'));
-            }
-
-            i++;
+            // Log.
+            console.log(`${file} - ${count} errors found`.red);
           }
+          else {
+            // Log.
+            console.log(`${file} - 0 errors found`.green);
+          }
+
+          if (i === length) {
+            callback(null, _.groupBy(_data, 'filename'));
+          }
+
+          i++;
         });
       });
     });

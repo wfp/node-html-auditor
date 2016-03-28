@@ -20,8 +20,11 @@ const files = require('../helpers/files');
 module.exports = {
   /**
    * Execute link.
+   *
+   * @param {Object} argv
+   * @param {Function} callback
    */
-  execute(argv) {
+  execute(argv, callback) {
     // Get arg - path to file.
     const path = argv.path;
     // Get arg - report directory.
@@ -43,13 +46,19 @@ module.exports = {
 
     this.scan(path, argv._, map, modified, uri, verbose, (error, data) => {
       if (error) {
-        throw new Error(error);
+        callback(error);
       }
 
       // Create report.
       report({
         link: data
-      }, _report, 'links-report.json');
+      }, _report, 'links-report.json', (error) => {
+        if (error) {
+          callback(error);
+        }
+
+        callback();
+      });
     });
   },
 
@@ -85,6 +94,7 @@ Options
    * @param {Function} callback
    */
   scan(file, _files, map, modified, uri, verbose, callback) {
+    let data = [];
     let i = 1;
     // Get file(s).
     files(file, _files, map, modified, (error, file, length) => {
@@ -100,14 +110,20 @@ Options
 
         // Test file.
         this.BLC(file, verbose, (_data) => {
-          if (i === length && _data.length) {
-            // Group by filename.
-            const data = _.groupBy(_data, 'filename');
-            for (const i in data) {
-              for (const j in data[i]) {
-                // Omit filename property.
-                data[i][j] = _.omit(data[i][j], 'filename');
+          if (i === length) {
+            if (_data.length) {
+              // Group by filename.
+              data = _.groupBy(_data, 'filename');
+              for (const i in data) {
+                for (const j in data[i]) {
+                  // Omit filename property.
+                  data[i][j] = _.omit(data[i][j], 'filename');
+                }
               }
+            }
+            else {
+              // Log.
+              console.log(`${file} - 0 errors found`.green)
             }
 
             callback(null, data);
@@ -179,7 +195,7 @@ Options
         }
         else {
           // Log.
-          console.log(`Test passed - ${url.original}`.green);
+          console.log(`${url.original} - errors not found`.green);
         }
 
       },

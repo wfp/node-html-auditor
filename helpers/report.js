@@ -21,8 +21,9 @@ const mkdirp = require('mkdirp');
  * @param {Object} data
  * @param {String} report
  * @param {String} file
+ * @param {Function} callback
  */
-module.exports = (data, report, file) => {
+module.exports = (data, report, file, callback) => {
   // Prepare data.
   data = JSON.stringify(data);
   if (report) {
@@ -33,19 +34,22 @@ module.exports = (data, report, file) => {
     // Create directory.
     mkdirp(report, '0777', (error) => {
       if (error) {
-        throw new Error(error);
+        callback(error);
       }
       
       // Stream - create file.
       const stream = fs.createWriteStream(file);
       // Stream - error event.
       stream.on('error', (error) => {
-        throw new Error(error);
+        callback(error);
       });
+
       // Stream - write.
       stream.write(data);
       // Log.
       console.log(`${file} has been created`.green);
+
+      callback();
     });
   }
   else {

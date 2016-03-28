@@ -21,10 +21,13 @@ const files  = require('../helpers/files');
 module.exports = {
   /**
    * Execute a11y.
+   *
+   * @param {Object} argv
+   * @param {Function} callback
    */
-  execute(argv) {
+  execute(argv, callback) {
     if (!process.env.PATH) {
-      throw new Error('Environment PATH not found.');
+      callback('Environment PATH not found');
     }
 
     // Get arg - path to file.
@@ -65,13 +68,19 @@ module.exports = {
 
     this.scan(options, _path, argv._, map, modified, (error, data) => {
       if (error) {
-        throw new Error(error);
+        callback(error);
       }
 
       // Create report.
       report({
         assessibility: data
-      }, _report, 'a11y-report.json');
+      }, _report, 'a11y-report.json', (error) => {
+        if (error) {
+          callback(error);
+        }
+
+        callback();
+      });
     });
   },
 
@@ -127,6 +136,7 @@ Options
           callback(null, data);
         });
       }
+      
       i++;
     });
   }

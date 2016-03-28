@@ -21,8 +21,11 @@ const mkdirp = require('mkdirp');
 module.exports = {
   /**
    * Execute fetch.
+   *
+   * @param {Object} argv
+   * @param {Function} callback
    */
-  execute(argv) {
+  execute(argv, callback) {
     // Get arg - sitemap uri.
     const uri = argv.uri;
     // Get arg - sitemap htmls directory.
@@ -41,11 +44,11 @@ module.exports = {
     // Make http request for sitemap uri.
     this.request(uri, (error, _404, XML) => {
       if (error) {
-        throw new Error(error);
+        callback(error);
       }
 
       if (_404) {
-        throw new Error(_404);
+        callback(_404);
       }
 
       let i = 0;
@@ -58,14 +61,14 @@ module.exports = {
       // Get uris [<loc>] from XML.
       this.getUrisFromXML(XML, modified, (error, uri, modified) => {
         if (error) {
-          throw new Error(error);
+          callback(error);
         }
 
         j++;
         // Make http request for [<loc>] uri.
         this.request(uri, (error, _404, HTML) => {
           if (error) {
-            throw new Error(error);
+            callback(error);
           }
 
           if (_404) {
@@ -79,7 +82,7 @@ module.exports = {
             // Add sitemap-[ID].html file.
             this.addSitemap(HTML, basename, dir, (error, basename, file) => {
               if (error) {
-                throw new Error(error);
+                callback(error);
               }
 
               if (modified) {
@@ -95,11 +98,13 @@ module.exports = {
                 // Add sitemap [MAP].json file | Log.
                 this.addSitemapMap(_map, map, (error, mapJSON) => {
                   if (error) {
-                    throw new Error(error);
+                    callback(error);
                   }
 
                   // Log.
                   console.log(`${mapJSON.cyan} has been created`);
+
+                  callback();
                 });
               }
             });
