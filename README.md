@@ -97,7 +97,7 @@ html-audit link --path ./html-pages --report ./report --base-uri http://example.
 npm run eslint
 ```
 
-# Test
+## Test
 
 ```
 npm run test
