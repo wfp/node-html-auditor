@@ -1,5 +1,6 @@
 env:
   node: true
+  es6: true
 
 # enable ECMAScript features
 ecmaFeatures:
@@ -72,6 +73,29 @@ rules:
   # list: http://eslint.org/docs/rules/#ecmascript-6
   ## Suggest using 'const' wherever possible
   prefer-const: 2
+  prefer-template: 2
+  no-var: 2
+  prefer-arrow-callback: 2
+  prefer-reflect: 2
+  prefer-spread: 2
+  object-shorthand: 2
+  prefer-rest-params: 2
+  require-yield: 2
+  template-curly-spacing: 2
+  yield-star-spacing: 2
+  no-useless-constructor: 2
+  no-this-before-super: 2
+  no-restricted-imports: 2
+  no-new-symbol: 2
+  no-dupe-class-members: 2
+  no-const-assign: 2
+  no-confusing-arrow: 2
+  no-class-assign: 2
+  generator-star-spacing: 2
+  constructor-super: 2
+  arrow-spacing: 2
+  arrow-parens: 2
+  arrow-body-style: 2
 
   # Strict Mode
   # list: https://github.com/eslint/eslint/tree/master/docs/rules#strict-mode
@@ -84,9 +108,8 @@ rules:
   no-undef: 2
 
   # Custom rules in tools/eslint-rules
-#  require-buffer: 2
-#  new-with-error: [2, "Error", "RangeError", "TypeError", "SyntaxError", "ReferenceError"]
-
+  #  require-buffer: 2
+  #  new-with-error: [2, "Error", "RangeError", "TypeError", "SyntaxError", "ReferenceError"]
 
 # Global scoped method and vars
 globals:

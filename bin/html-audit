@@ -1,4 +1,4 @@
-#! /usr/bin/env node
+#!/usr/bin/env node
 
 /**
  * @file html-audit
@@ -12,27 +12,57 @@
 /**
  * Module dependencies.
  */
-var argv = require('yargs').argv;
-var _ = require('underscore');
+const argv = require('yargs').argv;
+const pjson = require('../package.json');
+const colors = require('colors');
 
-var commands = {
-  fetch: require('../modules/html-fetch'),
-  a11y: require('../modules/a11y-audit'),
-  html5: require('../modules/html5-audit'),
-  link: require('../modules/link-audit')
-};
+// Check for version.
+if (argv.version) {
+  // Log.
+  console.log(`${pjson.version.green}`);
+  process.exit(0);
+}
 
-process.on('uncaughtException', function(error) {
+/*eslint-disable max-len*/
+// Prepare help text.
+const help = `html-audit usage:
+        html-audit [command]
+Commands
+        fetch   Fetch XML sitemap and download HTML pages.
+        a11y    Audit HTML pages for accessibility (WCAG2) compliance.
+        html5   Audit HTML pages for HTML5 compliance.
+        link    Audit HTML pages for issues with links.
+Options
+        --help     Display this help message.
+        --version  Display version number.`.yellow;
+/*eslint-enable max-len*/
+
+// Get command.
+const command = argv._[0];
+if (!command) {
+  // Log.
+  console.log(help);
+  process.exit(0);
+}
+
+process.on('uncaughtException', (error) => {
   // Log errors.
-  process.stdout.write(error.message.red + '\n');
+  process.stdout.write(
+  `html-audit ${command} reported an error: ${error.message}
+`.red
+  );
+  process.stdout.write(
+  `Invalid command. Use: html-audit --help for more information
+`.yellow
+  );
   process.exit(1);
 });
 
-var command = argv._[0];
-
-if (!_.has(commands, command)) {
-  throw new Error(command + ' command not found');
-}
+process.umask(0);
 
 // Run command.
-commands[command](argv);
+require(`../modules/${command}`).execute(argv, (error) => {
+  if (error) {
+    throw new Error(error);
+  }
+});

@@ -17,7 +17,7 @@ npm install -g html-auditor
 - `--help` _(optional)_ - Display help text
 - `--uri` _(required)_ - path or URL to XML Sitemap file
 - `--dir` _(required)_ - directory to output HTML files
-- `--map` _(required when --lastmod is provided)_ - file to output JSON that maps file names to URLs. If not set, sends to stdout
+- `--map` _(required when --lastmod is provided)_ - file to output JSON that maps file names to URLs and modified files. If not set, sends to stdout
 - `--lastmod` _(optional)_ - Date for downloading last modified content
 
 ### Example
@@ -39,8 +39,7 @@ html-audit fetch --uri https://www.washingtonpost.com/web-national-sitemap.xml -
 - `--standard [standard]` (default: `WCAG2AA`) - Accessibility standard as per [pa11y](https://github.com/nature/pa11y#standard-string)
 - `--report [path]` - path to output JSON audit report
 - `--ignore [types]` - types to ignore separated by semi-colons (`notice;warning`)
-- `--phantomjs [path]` - define the path to the phantomjs binary
-- `--map` _(required when --lastmod is provided)_ - file to output JSON that maps file names to URLs. If not set, sends to stdout
+- `--map` _(required when --lastmod is provided)_ - JSON map file which holds modified files data
 - `--lastmod` _(optional)_ - Scan last modified files
 
 ### Example
@@ -59,8 +58,9 @@ html-audit a11y --path ./html-pages --report ./report --standard WCAG2AA --ignor
 - `--path [path / file]` _(required)_ - path to HTML files or an HTML file to audit
 - `--report [path]` - path to output JSON audit report
 - `--errors-only` - only report errors (no notices or warnings)
-- `--map` _(required when --lastmod is provided)_ - file to output JSON that maps file names to URLs. If not set, sends to stdout
+- `--map` _(required when --lastmod is provided)_ - JSON map file which holds modified files data
 - `--lastmod` _(optional)_ - Scan last modified files
+- `--validator` _(optional)_ - Manually specify validator service
 
 ### Example
 
@@ -79,7 +79,7 @@ html-audit html5 --path ./html-pages --report ./report --errors-only
 - `--base-uri` _(required)_ - the base URL of the site being audited
 - `--report [path]` - path to output JSON audit report
 - `--report-verbose` - verbose report
-- `--map` _(required when --lastmod is provided)_ - file to output JSON that maps file names to URLs. If not set, sends to stdout
+- `--map` _(required when --lastmod is provided)_ - JSON map file which holds modified files data.
 - `--lastmod` _(optional)_ - Scan last modified files
 
 ### Example
@@ -96,3 +96,10 @@ html-audit link --path ./html-pages --report ./report --base-uri http://example.
 # Run code standard review
 npm run eslint
 ```
+
+## Test
+
+```
+npm run test
+```
+
