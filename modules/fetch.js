@@ -243,6 +243,7 @@ Options
    */
   addSitemapMap: (data, map, callback) => {
     if (map && typeof map === 'string') {
+      // Normalize.
       map = path.resolve(map);
       // Get map directory.
       const dirname = path.dirname(map);
@@ -255,9 +256,9 @@ Options
         // Get map basename.
         const basename = path.basename(map).split('.');
         // Prepare [MAP].json file.
-        const mapJSON = path.join(dirname, `${basename[0]}.json`);
+        map = path.join(dirname, `${basename[0]}.json`);
         // Stream - create map file.
-        const stream = fs.createWriteStream(mapJSON);
+        const stream = fs.createWriteStream(map);
         // Stream - error event.
         stream.on('error', (error) => {
           callback(error);
@@ -266,7 +267,7 @@ Options
         // Stream - write in file.
         stream.write(JSON.stringify(data));
 
-        callback(null, mapJSON);
+        callback(null, map);
       });
     }
     else {

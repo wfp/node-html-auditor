@@ -26,11 +26,17 @@ const colors = require('colors');
 module.exports = (file, files, map, modified, callback) => {
   ((_callback) => {
     if (modified) {
+      // Get map directory.
+      const dirname = path.dirname(map);
+      // Get map basename.
+      const basename = path.basename(map).split('.');
+      // Prepare [MAP].json file.
+      map = path.join(dirname, `${basename[0]}.json`);
       // Get modified files from map file.
       fs.readFile(map, 'utf-8', (error, data) => {
         if (error && error.code === 'ENOENT') {
           /*eslint-disable max-len*/
-          error.message = `The file ${map} does not exist \n You must specify an existent map file`;
+          error.message = `The file ${map} does not exist \nYou must specify an existent map file`;
           /*eslint-enable max-len*/
           callback(error);
         }
@@ -79,6 +85,7 @@ module.exports = (file, files, map, modified, callback) => {
             _callback(files);
           }
         });
+
         break;
       }
     }
