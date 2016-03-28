@@ -30,18 +30,20 @@ module.exports = {
     // Get arg - report directory.
     const _report = argv.report || '';
     // Get arg - errors only.
-    const errorsOnly = argv['errors-only'] || false;
+    const errors = argv['errors-only'] || false;
     // Get arg - JSON map file.
     const map = argv.map || '';
     // Get arg - modified boolean.
     const modified = argv.lastmod || false;
+    // Get arg - validator service.
+    const service = argv.validator || '';
 
     if (argv.help || !path || (modified && !map)) {
       console.log(this.help());
       process.exit(0);
     }
 
-    this.scan(path, argv._, map, modified, errorsOnly, (error, data) => {
+    this.scan(path, argv._, map, modified, errors, service, (error, data) => {
       if (error) {
         callback(error);
       }
@@ -86,10 +88,19 @@ Options
    * @param {String} map
    * @param {Boolean} modified
    * @param {Boolean} errorsOnly
+   * @param {String} service
    * @param {Function} callback
    */
-  scan: (file, _files, map, modified, errorsOnly, callback) => {
+  scan: (file, _files, map, modified, errorsOnly, service, callback) => {
     const _data = [];
+    const options = {
+      errorsOnly
+    };
+
+    if (service) {
+      options['service'] = service;
+    }
+
     let i = 1;
     // Get file(s).
     files(file, _files, map, modified, (error, file, length) => {
@@ -104,7 +115,7 @@ Options
         }
 
         // Test file.
-        html5Lint(content, { errorsOnly }, (error, data) => {
+        html5Lint(content, options, (error, data) => {
           if (error) {
             callback(error);
           }

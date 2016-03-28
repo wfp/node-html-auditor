@@ -36,7 +36,7 @@ module.exports = (data, report, file, callback) => {
       if (error) {
         callback(error);
       }
-      
+
       // Stream - create file.
       const stream = fs.createWriteStream(file);
       // Stream - error event.

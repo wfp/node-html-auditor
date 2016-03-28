@@ -123,7 +123,7 @@ Options
             }
             else {
               // Log.
-              console.log(`${file} - 0 errors found`.green)
+              console.log(`${file} - 0 errors found`.green);
             }
 
             callback(null, data);
