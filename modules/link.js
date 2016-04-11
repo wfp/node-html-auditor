@@ -162,7 +162,7 @@ Options
           error = result.error.toString();
         }
         else if (result.http.statusCode === 404) {
-          error = 'Link page not found';
+          error = 'Link not found';
         }
         else if (result.html.tagName === 'a'
           && url.original.search(base) > -1) {
