@@ -19,8 +19,19 @@ describe('html-audit', function() {
     it(`should pass accessebility test`, (done) => {
       require('../modules/a11y').execute({ 
         _: [ 'a11y' ],
-        path: 'files/sitemaps/',
+        path: 'files/sitemaps/sitemap-1.html',
         report: 'files/reports/',
+       }, done);
+    });
+  });
+
+  context('html5', () => {
+    it(`should pass HTML5 validator test`, (done) => {
+      require('../modules/html5').execute({ 
+        _: [ 'html5' ],
+        path: 'files/sitemaps/sitemap-1.html',
+        report: 'files/reports/',
+        'errors-only': true
        }, done);
     });
   });
@@ -29,21 +40,10 @@ describe('html-audit', function() {
     it(`should pass broken link checker test`, (done) => {
       require('../modules/link').execute({ 
         _: [ 'link' ],
-        path: 'files/sitemaps/',
+        path: 'files/sitemaps/sitemap-1.html',
         report: 'files/reports/',
         'base-uri': 'https://www.washingtonpost.com',
         'report-verbose': true
-       }, done);
-    });
-  });
-  
-  context('html5', () => {
-    it(`should pass HTML5 validator test`, (done) => {
-      require('../modules/html5').execute({ 
-        _: [ 'html5' ],
-        path: 'files/sitemaps/',
-        report: 'files/reports/',
-        'errors-only': true
        }, done);
     });
   });
