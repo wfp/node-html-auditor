@@ -184,7 +184,8 @@ Options
         }
 
         if (i === services.length - 1) {
-          const service = services[Math.min(...index)];
+          // @TODO - use spreading operator when 5.x is stable.
+          const service = services[Math.min.apply(null, index)];
           if (service) {
             callback(null, service);
           }

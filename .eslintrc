@@ -76,7 +76,6 @@ rules:
   prefer-template: 2
   no-var: 2
   prefer-arrow-callback: 2
-  prefer-reflect: 2
   prefer-spread: 2
   object-shorthand: 2
   prefer-rest-params: 2
