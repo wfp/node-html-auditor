@@ -53,6 +53,7 @@ module.exports = {
 
       let i = 0;
       let j = 0;
+      let done = 0;
       const _map = {
         uris: {},
         modified: []
@@ -94,7 +95,9 @@ module.exports = {
               // Log.
               console.log(`${file.green} has been added`);
 
-              if (i === j) {
+              done++;
+
+              if (done === j) {
                 // Add sitemap [MAP].json file | Log.
                 this.addSitemapMap(_map, map, (error, mapJSON) => {
                   if (error) {
