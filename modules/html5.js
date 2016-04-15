@@ -12,6 +12,7 @@
  */
 const fs = require('fs');
 const html5Lint = require('html5-lint');
+const request = require('request');
 const colors = require('colors');
 const _ = require('underscore');
 const report = require('../helpers/report');
@@ -43,29 +44,29 @@ module.exports = {
       process.exit(0);
     }
 
-    // Prepare html5-lint options.
-    const options = {
-      errorsOnly
-    };
-
-    if (service) {
-      options['service'] = service;
-    }
-
-    this.scan(options, path, argv._, map, modified, (error, data) => {
+    this.getService(service, (error, service) => {
       if (error) {
-        return callback(error);
+        callback(error);
       }
 
-      // Create report.
-      report({
-        html5: data
-      }, _report, 'html5-report.json', (error) => {
+      this.scan({
+        errorsOnly,
+        service
+      }, path, argv._, map, modified, (error, data) => {
         if (error) {
           callback(error);
         }
 
-        callback();
+        // Create report.
+        report({
+          html5: data
+        }, _report, 'html5-report.json', (error) => {
+          if (error) {
+            callback(error);
+          }
+
+          callback();
+        });
       });
     });
   },
@@ -150,5 +151,51 @@ Options
         });
       });
     });
+  },
+
+  /**
+   * Get validator service.
+   *
+   * @param {String} service
+   * @param {Function} callback
+   */
+  getService: (service, callback) => {
+    let services = [
+      'https://validator.w3.org/nu/',
+      'https://checker.html5.org/',
+      'https://html5.validator.nu/'
+    ];
+
+    if (service) {
+      services = [
+        service
+      ];
+    }
+
+    let i = 0;
+    const index = [];
+
+    for (const j in services) {
+      const service = services[j];
+      request(service, (error, response) => {
+        const status = response.statusCode;
+        if (status === 200) {
+          index.push(j);
+        }
+
+        if (i === services.length - 1) {
+          // @TODO - use spreading operator when 5.x is stable.
+          const service = services[Math.min.apply(null, index)];
+          if (service) {
+            callback(null, service);
+          }
+          else {
+            callback(error || `service not found - ${status}`);
+          }
+        }
+
+        i++;
+      });
+    }
   }
 };
