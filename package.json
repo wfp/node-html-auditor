@@ -1,6 +1,6 @@
 {
   "name": "html-auditor",
-  "version": "0.16.0",
+  "version": "1.0.0",
   "description": "Accessibility (a11y), HTML5 and link auditor for NodeJS",
   "repository": {
     "type": "git",
@@ -28,7 +28,7 @@
     "html-audit": "./bin/html-audit"
   },
   "engines": {
-    "node": ">=6.9.0"
+    "node": ">=5.0.0"
   },
   "dependencies": {
     "async": "^2.1.2",
