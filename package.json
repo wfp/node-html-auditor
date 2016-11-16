@@ -28,7 +28,7 @@
     "html-audit": "./bin/html-audit"
   },
   "engines": {
-    "node": ">=4.4.2"
+    "node": ">=6.9.0"
   },
   "dependencies": {
     "async": "^2.1.2",
@@ -44,8 +44,8 @@
     "yargs": "^6.4.0"
   },
   "devDependencies": {
-    "eslint": "^2.3.0",
-    "mocha": "^2.4.5"
+    "eslint": "^3.10.2",
+    "mocha": "^3.1.2"
   },
   "license": "MIT",
   "scripts": {
