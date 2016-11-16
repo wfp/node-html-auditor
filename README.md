@@ -1,9 +1,4 @@
-# HTML auditor
-
-Branch  | Build Status
---------|-------------
-master  | [![Build Status](https://travis-ci.org/wfp/node-html-auditor.svg?branch=master)](https://travis-ci.org/wfp/ui)
-develop | [![Build Status](https://travis-ci.org/wfp/node-html-auditor.svg?branch=develop)](https://travis-ci.org/wfp/node-html-auditor)
+[![Build Status](https://travis-ci.org/wfp/node-html-auditor.svg?branch=develop)](https://travis-ci.org/wfp/node-html-auditor)
 
 A NodeJS CLI tool to fetch and audit HTML pages for [web accessibility](https://en.wikipedia.org/wiki/Web_accessibility) (WCAG2), HTML5 and link validation.
 
