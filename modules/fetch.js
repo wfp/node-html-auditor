@@ -1,7 +1,5 @@
 /**
- * @file fetch.js
- * @author Lasha Badashvili (lashab@picktek.com)
- *
+ * @file
  * Fetches sitemap URIs & downloads HTML content.
  */
 
@@ -19,6 +17,7 @@ const colors = require('colors');
 const mkdirp = require('mkdirp');
 
 module.exports = {
+
   /**
    * Execute fetch.
    *
@@ -143,6 +142,7 @@ Options
    */
   request: (uri, callback) => {
     let content = '';
+
     request(uri).on('response', (response) => {
       if (response && response.statusCode === 404) {
         callback(null, `${uri} not found - code: ${response.statusCode}`.red);
@@ -167,14 +167,18 @@ Options
    */
   getUrisFromXML: (XML, modified, callback) => {
     const _stream = new stream.PassThrough();
+
     _stream.end(XML);
     const _XML =  new XMLStream(_stream);
+
     _XML.on('endElement: url', (item) => {
       let _modified = false;
       let _uri = '';
+
       if ('loc' in item) {
         // Get location (uri).
         const location = item.loc;
+
         if (modified && 'lastmod' in item) {
           // Get sitemap modified date time.
           const __modified = new Date(item.lastmod).getTime();
@@ -182,6 +186,7 @@ Options
           const ___modified = new Date(modified).getTime();
           const condition = __modified === ___modified ||
             __modified > ___modified;
+
           if (condition) {
             _uri = location;
             _modified = true;
@@ -225,6 +230,7 @@ Options
       const file = path.join(directory, basename);
       // Stream - create sitemap file.
       const stream = fs.createWriteStream(file);
+
       // Stream - error event.
       stream.on('error', (error) => {
         callback(error);
@@ -250,6 +256,7 @@ Options
       map = path.resolve(map);
       // Get map directory.
       const dirname = path.dirname(map);
+
       // Create map directory.
       mkdirp(dirname, '0777', (error) => {
         if (error) {
@@ -262,6 +269,7 @@ Options
         map = path.join(dirname, `${basename[0]}.json`);
         // Stream - create map file.
         const stream = fs.createWriteStream(map);
+
         // Stream - error event.
         stream.on('error', (error) => {
           callback(error);
@@ -278,5 +286,6 @@ Options
       console.log(data);
     }
   }
+
 };
 

@@ -1,7 +1,5 @@
 /**
- * @file a11y.js
- * @author Lasha Badashvili (lashab@picktek.com)
- *
+ * @file
  * Accessibility testing - (using pa11y module).
  */
 
@@ -19,6 +17,7 @@ const report = require('../helpers/report');
 const files  = require('../helpers/files');
 
 module.exports = {
+
   /**
    * Execute a11y.
    *
@@ -118,6 +117,7 @@ Options
     const _data = {};
     const _patty = pa11y(options);
     let i = 1;
+
     // Get file(s).
     files(file, _files, map, modified, (error, file, length) => {
       if (error) {
@@ -140,5 +140,6 @@ Options
       i++;
     });
   }
+
 };
 

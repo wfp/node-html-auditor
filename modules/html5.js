@@ -1,7 +1,5 @@
 /**
- * @file html5.js
- * @author Lasha Badashvili (lashab@picktek.com)
- *
+ * @file
  * HTML5 validator (using html5-lint module).
  */
 
@@ -19,6 +17,7 @@ const report = require('../helpers/report');
 const files = require('../helpers/files');
 
 module.exports = {
+
   /**
    * Execute html5.
    *
@@ -104,6 +103,7 @@ Options
   scan: (options, file, _files, map, modified, callback) => {
     const _data = [];
     let i = 1;
+
     // Get file(s).
     files(file, _files, map, modified, (error, file, length) => {
       if (error) {
@@ -177,20 +177,20 @@ Options
 
     for (const j in services) {
       const service = services[j];
-      request(service, (error, response) => {
-        const status = response.statusCode;
-        if (status === 200) {
+
+      request(service, (error) => {
+        if (!error) {
           index.push(j);
         }
 
         if (i === services.length - 1) {
-          // @TODO - use spreading operator when 5.x is stable.
-          const service = services[Math.min.apply(null, index)];
+          const service = services[Math.min(...index)];
+
           if (service) {
             callback(null, service);
           }
           else {
-            callback(error || `service not found - ${status}`);
+            callback(error);
           }
         }
 
@@ -198,4 +198,5 @@ Options
       });
     }
   }
+
 };
