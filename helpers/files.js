@@ -1,7 +1,5 @@
 /**
- * @file files.js
- * @author Lasha Badashvili (lashab@picktek.com)
- *
+ * @file
  * Get HTML file(s) path to scan.
  */
 
@@ -24,6 +22,7 @@ const colors = require('colors');
  * @param {Function} callback
  */
 module.exports = (file, files, map, modified, callback) => {
+
   ((_callback) => {
     if (modified) {
       // Get map directory.
@@ -32,6 +31,7 @@ module.exports = (file, files, map, modified, callback) => {
       const basename = path.basename(map).split('.');
       // Prepare [MAP].json file.
       map = path.join(dirname, `${basename[0]}.json`);
+
       // Get modified files from map file.
       fs.readFile(map, 'utf-8', (error, data) => {
         if (error && error.code === 'ENOENT') {
@@ -52,6 +52,7 @@ module.exports = (file, files, map, modified, callback) => {
       // Get file(s) from directory.
       files.shift();
       files.push(file);
+
       for (const i in files) {
         // Get file.
         file = files[i];
@@ -63,6 +64,7 @@ module.exports = (file, files, map, modified, callback) => {
 
           // Remove slash.
           file = path.resolve(file);
+
           // Case path is directory.
           // Get all files from directory.
           // Passing files array to the callback e.g - [path/to/file.html ..]
@@ -91,8 +93,10 @@ module.exports = (file, files, map, modified, callback) => {
     }
   })((files) => {
     let i = files.length;
+
     while (i--) {
       const file = files[i];
+
       if (!/[a-zA-Z]+(([\-_])?[0-9]+)?\.html$/.test(file)) {
         // Remove non-.html file from files.
         files.splice(files.indexOf(file), 1);
@@ -105,4 +109,5 @@ module.exports = (file, files, map, modified, callback) => {
       callback(null, file, files.length);
     });
   });
+
 };

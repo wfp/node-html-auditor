@@ -1,7 +1,5 @@
 /**
- * @file report.js
- * @author Lasha Badashvili (lashab@picktek.com)
- *
+ * @file
  * Create report JSON file.
  */
 
@@ -24,8 +22,10 @@ const mkdirp = require('mkdirp');
  * @param {Function} callback
  */
 module.exports = (data, report, file, callback) => {
+
   // Prepare data.
   data = JSON.stringify(data);
+
   if (report) {
     // Prepare report directory.
     report = path.resolve(report);
@@ -39,6 +39,7 @@ module.exports = (data, report, file, callback) => {
 
       // Stream - create file.
       const stream = fs.createWriteStream(file);
+
       // Stream - error event.
       stream.on('error', (error) => {
         callback(error);
@@ -56,4 +57,5 @@ module.exports = (data, report, file, callback) => {
     // Log.
     console.log(data);
   }
+
 };
