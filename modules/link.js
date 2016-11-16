@@ -1,7 +1,5 @@
 /**
- * @file link.js
- * @author Lasha Badashvili (lashab@picktek.com)
- *
+ * @file
  * Scan links (using broken-link-checker module).
  */
 
@@ -18,6 +16,7 @@ const report = require('../helpers/report');
 const files = require('../helpers/files');
 
 module.exports = {
+
   /**
    * Execute link.
    *
@@ -154,6 +153,7 @@ Options
         const url = result.url;
         // Get base original url.
         const base = result.base.original;
+
         // Get links with 404 response.
         // Get links which has tag a & has base uri in href.
         // Get links which has internal & redirected property true.
@@ -204,4 +204,5 @@ Options
       }
     });
   }
+
 };
