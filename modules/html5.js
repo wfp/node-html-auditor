@@ -178,8 +178,8 @@ Options
     for (const j in services) {
       const service = services[j];
 
-      request(service, (error) => {
-        if (!error) {
+      request(service, (error, response) => {
+        if (!error && response.statusCode === 200) {
           index.push(j);
         }
 
