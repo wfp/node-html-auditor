@@ -62,7 +62,7 @@ module.exports = {
 
     if (ignore && typeof ignore === 'string') {
       // Add ignore option.
-      options['ignore'] = ignore.split(',');
+      options['ignore'] = ignore.split(';');
     }
 
     this.scan(options, _path, argv._, map, modified, (error, data) => {
