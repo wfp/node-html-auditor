@@ -1,6 +1,6 @@
 {
   "name": "html-auditor",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Accessibility (a11y), HTML5 and link auditor for NodeJS",
   "repository": {
     "type": "git",
@@ -28,24 +28,24 @@
     "html-audit": "./bin/html-audit"
   },
   "engines": {
-    "node": ">=4.4.2"
+    "node": ">=5.0.0"
   },
   "dependencies": {
-    "async": "^1.5.2",
-    "broken-link-checker": "^0.6.7",
+    "async": "^2.1.2",
+    "broken-link-checker": "^0.7.3",
     "colors": "^1.1.2",
-    "html5-lint": "^0.2.5",
+    "html5-lint": "^0.3.0",
     "mkdirp": "^0.5.1",
-    "pa11y": "^3.6.0",
-    "phantomjs-prebuilt": "^2.1.5",
-    "request": "^2.69.0",
+    "pa11y": "^4.0.1",
+    "phantomjs-prebuilt": "^2.1.13",
+    "request": "^2.78.0",
     "underscore": "^1.8.3",
     "xml-stream": "^0.4.5",
-    "yargs": "^3.32.0"
+    "yargs": "^6.4.0"
   },
   "devDependencies": {
-    "eslint": "^2.3.0",
-    "mocha": "^2.4.5"
+    "eslint": "^3.10.2",
+    "mocha": "^3.1.2"
   },
   "license": "MIT",
   "scripts": {

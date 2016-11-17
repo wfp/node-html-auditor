@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * @file html-audit
- * @author Lasha Badashvili (lashab@picktek.com)
- *
+ * @file
  * Running HTML auditor tools.
  */
 
@@ -39,6 +37,7 @@ Options
 
 // Get command.
 const command = argv._[0];
+
 if (!command) {
   // Log.
   console.log(help);
@@ -55,6 +54,7 @@ process.on('uncaughtException', (error) => {
   `Invalid command. Use: html-audit --help for more information
 `.yellow
   );
+
   process.exit(1);
 });
 
